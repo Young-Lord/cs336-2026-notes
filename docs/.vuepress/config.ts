@@ -9,7 +9,7 @@ const lectures = [
   { text: "03 Architectures", prefix: "/lectures/03/", pages: ["overview.md", "normalization.md", "activations-ffn.md", "position-embeddings.md", "hyperparameters.md", "stability-and-attention.md"] },
   { text: "04 Attention Alternatives", prefix: "/lectures/04/", pages: ["overview.md", "linear-attention.md", "ssm-hybrid.md", "sparse-attention.md", "moe.md", "moe-training.md"] },
   { text: "05 GPUs, TPUs", prefix: "/lectures/05/", pages: ["overview.md", "gpu-hardware.md", "tpu-and-strengths.md", "gpu-performance.md", "matrix-mystery.md", "flash-attention.md"] },
-  { text: "06 Kernels, Triton", prefix: "/lectures/06/", pages: [] },
+  { text: "06 Kernels, Triton", prefix: "/lectures/06/", pages: ["overview.md", "hardware-considerations.md", "benchmarking-profiling.md", "triton-gelu.md", "softmax-row-sum.md", "matmul-tiling.md"] },
   { text: "07 Parallelism", prefix: "/lectures/07/", pages: [] },
   { text: "08 Parallelism", prefix: "/lectures/08/", pages: [] },
   { text: "09 Scaling Laws", prefix: "/lectures/09/", pages: [] },

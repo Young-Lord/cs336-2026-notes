@@ -16,7 +16,7 @@ const lectures = [
   { text: "10 Inference", prefix: "/lectures/10/", pages: ["01-inference-overview.md", "02-arithmetic-intensity.md", "03-reducing-kv-cache.md", "04-quantization-and-pruning.md", "05-speculative-decoding.md", "06-dynamic-workloads.md"] },
   { text: "11 Scaling Laws", prefix: "/lectures/11/", pages: ["01-introduction-and-motivation.md", "02-minicpm-scaling-recipe.md", "03-wsd-and-deepseek.md", "04-recent-scaling-recipes.md", "05-stepfun-and-optimizer-scaling.md", "06-muon-and-mup.md"] },
   { text: "12 Evaluation", prefix: "/lectures/12/", pages: ["01-what-is-good-and-perplexity.md", "02-exam-benchmarks.md", "03-chat-benchmarks.md", "04-agentic-benchmarks.md", "05-reasoning-and-safety-benchmarks.md", "06-realism-validity-and-conclusion.md"] },
-  { text: "13 Data (Sources, Datasets)", prefix: "/lectures/13/", pages: [] },
+  { text: "13 Data (Sources, Datasets)", prefix: "/lectures/13/", pages: ["01-why-data-matters.md", "02-origin-of-data.md", "03-copyright-and-fair-use.md", "04-source-infrastructure.md", "05-model-datasets-2019-2022.md", "06-model-datasets-2023-2024.md"] },
   { text: "14 Data", prefix: "/lectures/14/", pages: [] },
   { text: "15 Mid/Post-Training", prefix: "/lectures/15/", pages: [] },
   { text: "16 Post-Training - RLVR", prefix: "/lectures/16/", pages: [] },

@@ -12,7 +12,7 @@ const lectures = [
   { text: "06 Kernels, Triton", prefix: "/lectures/06/", pages: ["overview.md", "hardware-considerations.md", "benchmarking-profiling.md", "triton-gelu.md", "softmax-row-sum.md", "matmul-tiling.md"] },
   { text: "07 Parallelism", prefix: "/lectures/07/", pages: ["overview.md", "collectives.md", "hardware.md", "torch-distributed.md", "data-and-tensor-parallelism.md", "pipeline-parallelism.md"] },
   { text: "08 Parallelism", prefix: "/lectures/08/", pages: ["01-motivation-and-networking.md", "02-data-parallelism-and-zero.md", "03-pipeline-and-tensor-parallelism.md", "04-activation-sequence-expert.md", "05-scale-and-case-studies.md"] },
-  { text: "09 Scaling Laws", prefix: "/lectures/09/", pages: [] },
+  { text: "09 Scaling Laws", prefix: "/lectures/09/", pages: ["01-introduction-and-history.md", "02-data-scaling-laws.md", "03-model-engineering-scaling.md", "04-data-versus-model-size.md", "05-compute-optimal-and-chinchilla.md"] },
   { text: "10 Inference", prefix: "/lectures/10/", pages: [] },
   { text: "11 Scaling Laws", prefix: "/lectures/11/", pages: [] },
   { text: "12 Evaluation", prefix: "/lectures/12/", pages: [] },

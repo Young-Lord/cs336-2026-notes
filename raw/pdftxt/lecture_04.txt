@@ -1,0 +1,502 @@
+                           Lecture 4
+A T T E N T I O N A LT E R N AT I V E S A N D M I X T U R E S O F E X P E R T S
+
+
+                                   CS336
+                                  Tatsu H
+Attention alternatives
+Cost of attention rises with large context sizes… how do we control those costs?
+
+
+
+
+                                          https://www.meibel.ai/post/understanding-the-impact-of-increasing-llm-context-windows
+The ‘basic’ toolkit
+
+
+
+
+Combine local + global attention                     Systems engineering
+
+          But what if we want more radical and potentially large gains?
+Linear attention
+Consider the usual attention operation.. 𝑄 ∈ 𝑅 𝑛×𝑑𝑘 , 𝐾 ∈ 𝑅 𝑛×𝑑𝑘 , 𝑉 ∈ 𝑅 𝑛×𝑑𝑣
+
+
+
+                                      𝐴𝑡𝑡𝑛 𝑄, 𝐾, 𝑉 = 𝜌 𝑄𝐾 ⊤ 𝑉
+
+
+
+This is quadratic due to 𝑄𝐾 ⊤ (𝑛 2 𝑑𝑘 ). Can we do better (when 𝜌 is the identity)?
+
+
+
+                                            𝑄𝐾 ⊤ 𝑉 = 𝑄(𝐾 ⊤ 𝑉)
+
+
+
+This is very silly, but surprisingly important.. We get from 𝑛 2 𝑑𝑘 + 𝑛 2 𝑑𝑣 to 2𝑛𝑑𝑣 𝑑𝑘
+
+                     [Shen et al 2018, Katharopoulos 2020 for kernel version. Also connections to things like fast weight programmers]
+Recurrent form of linear attention
+
+Recall that in purely linear attention, we consider the reordering
+
+                                      𝑄𝐾 ⊤ 𝑉 = 𝑄(𝐾 ⊤ 𝑉)
+
+This is linear time (great) but the even nicer thing is that this looks like a RNN.
+
+                             𝑆𝑡 = 𝑆𝑡−1 + 𝑘𝑡 𝑣𝑡⊤ and 𝑦𝑡 = 𝑞𝑡⊤ 𝑆𝑡
+
+This ‘duality’ allows us to train efficiently (using the parallel, quadratic form) and
+    inference efficiently (using the serial, linear form)
+
+
+
+                                                               (Note: if one weights 𝑆𝑡−1 by 𝛾, you get a RetNet)
+Minimax M1
+
+
+
+
+Minimax M1 (and minimax-text-01) use a 7-to-1 hybrid (7 linear, 1 full) linear attention.
+
+Performance (generally) seems strong, and they show linear scaling in context length
+From linear attention to Mamba-2
+Let’s generalize linear attention a little bit and add per-position weights..
+
+                   𝑆𝑡 = 𝑆𝑡−1 + 𝑘𝑡 𝑣𝑡⊤ and 𝑦𝑡 = 𝑞𝑡⊤ 𝑆𝑡 (Linear attention)
+         𝑆𝑡 = 𝛾𝑡 𝑆𝑡−1 + 𝑘𝑡 𝑣𝑡⊤ and 𝑦𝑡 = 𝑞𝑡⊤ 𝑆𝑡 + 𝑣𝑡⊤ 𝐷 with 𝛾𝑡 = 𝑓(𝑥𝑡 )(Mamba-2)
+
+There is a lot more words to justify this (go read the mamba 2 paper) but the mechanics
+   is that we can make linear attention more expressive via gating (gating is good!)
+
+This continues to have duality properties (compute 𝛾 in parallel, apply duality)
+  Nemotron 3
+
+
+
+
+Mamba attention hybrid (3-1 ish) – comparable (or better) pref to other similar models
+Gated delta net (and friends)
+Let’s generalize things further – gate the input and selectively erase the state.
+
+         𝑆𝑡 = 𝛾𝑡 𝑆𝑡−1 + 𝑘𝑡 𝑣𝑡⊤ and 𝑦𝑡 = 𝑞𝑡⊤ 𝑆𝑡 + 𝑣𝑡⊤ 𝐷 with 𝛾𝑡 = 𝑓(𝑥𝑡 )(Mamba-2)
+
+                        𝑆𝑡 = 𝛾𝑡 (𝐼 − 𝛽𝑡 𝑘𝑡 𝑘𝑡⊤ )𝑆𝑡−1 + 𝛽𝑡 𝑘𝑡 𝑣𝑡⊤ and
+                   𝑦𝑡 = 𝑞𝑡⊤ 𝑆𝑡 with 𝛾𝑡 = 𝑓 𝑥𝑡 , 𝛽𝑡 = 𝑓 𝑥𝑡 (Gated Delta Net)
+
+             The gated delta net adds a ‘no input operation’ gate (𝛽 = 0)
+          And erases anything in the direction of the current key (𝐼 − 𝛽𝑡 𝑘𝑡 𝑘𝑡⊤ )
+
+   Close relationships to various fast weight programming / test time training ideas.
+Qwen 3.5 / Qwen Next
+
+
+
+
+               The newest qwen are 3-1 GDN / Attention hybrids.
+ Once again, pretty reasonable performance with good inference characteristics
+Hybrid performance
+
+
+
+
+Not many controlled ablations, but some evidence of low losses at small hybrid ratios
+Alternative to hybrids: sparse adaptation
+Instead of attending to every token, do sparse attention (DSA)
+
+
+
+
+          The indexer can be very lightweight, giving significant gains
+         Can be ‘post hoc’ adapted after dense short context pretraining
+DSA – Deepseek Sparse Attention (v3.2, GLM5)
+Mixture of experts
+
+
+
+
+GPT4 (?)
+What’s a MoE?
+
+
+
+
+                                                                         [Fedus et al 2022]
+
+ Replace big feedforward with (many) big feedforward networks and a selector layer
+
+              You can increase the # experts without affecting FLOPs
+Why are MoEs getting popular?
+Same FLOP, more param does better
+
+
+
+
+                                    [Fedus et al 2022]
+Why are MoEs getting popular?
+Faster to train MoEs
+
+
+
+
+                                [OlMoE]
+Why are MoEs getting popular?
+
+
+
+
+Highly competitive vs dense equivalents
+Why are MoEs getting popular?
+Parallelizable to many devices
+Some MoE results – from the west
+
+
+
+
+ MoEs are most of the highest-performance open models, and are quite quick
+Earlier MoE results from Chinese groups – Qwen
+Chinese LLM companies are also doing quite a bit of MoE work on the smaller end
+Earlier MoE results from Chinese groups - DeepSeek
+There’s also some good recent ablation work on MoEs showing they’re generally good
+Recent MoE results – DeepSeek v3
+Why haven’t MoEs been more popular?
+Infrastructure is complex / advantages on multi node
+
+
+
+
+                                                                      [Fedus et al 2022]
+Training objectives are somewhat heuristic (and sometimes unstable)
+
+
+
+
+                                                                       [Zoph et al 2022]
+What MoEs generally look like
+
+Typical: replace MLP with MoE layer   Less common: MoE for attention heads
+
+
+
+
+                                                          [ModuleFormer, JetMoE]
+MoE – what varies?
+
+
+❖ Routing function
+
+
+
+❖ Expert sizes
+
+
+
+❖ Training objectives
+Routing function - overview
+Many of the routing algorithms boil down to ‘choose top k’
+
+
+
+
+         Token chooses           Expert chooses       Global routing via
+            expert                   token              optimization
+                                                                           [Fedus et al 2022]
+Routing type
+Almost all the MoEs do a standard ‘token choice topk’ routing. Some recent ablations
+        Common routing variants in detail
+                                        Used in most MoEs
+
+                                        Switch Transformer (k=1)
+Top-k                                   Gshard (k=2), Grok (2), Mixtral (2),
+                                        Qwen (4), DBRX (4),
+                                        DeepSeek (7)
+
+
+
+
+Hashing                                 Common baseline
+
+                                                                 [Fedus et al 2022]
+        Other routing methods
+
+
+
+RL to learn routes              Used in some of the earliest work
+                                Bengio 2013, not common now
+
+
+
+
+Solve a matching                Linear assignment for routing
+    problem                     Used in various papers like Clark ‘22
+
+                                                      [Fedus et al 2022]
+    Top-K routing in detail.
+    Most papers do the old and classic top-k routing. How does this work?
+
+           Gating
+                                                               This is the
+                                                               DeepSeek (V1-2) router
+                                                               (Grok, Qwen do this too)
+
+
+
+                                                               Mixtral, DBRX,
+                                                               DeepSeek v3
+                                                               softmaxes after the
+                                                               TopK
+
+Gates selected by a logistic regressor                                           [Dai et al 2024]
+Recent variations from DeepSeek and other Chinese LMs
+
+
+
+
+   Smaller, larger number of experts + a few shared experts that are always on.
+
+                                               (Used in DeepSeek / Qwen, originally from DeepSpeed MoE)
+Various ablations from the DeepSeek paper
+
+
+
+
+More experts, shared experts all seem to generally help
+Ablations from OlMoE
+Gains from fine-grained experts, none from shared experts.
+Expert routing setups for recent MoEs
+Model                Routed   Active   Shared   Fine-grained ratio
+GShard               2048     2        0
+Switch Transformer   64       1        0
+ST-MOE               64       2        0
+Mixtral              8        2        0
+DBRX                 16       4        0
+Grok                 8        2        0
+DeepSeek v1          64       6        2        1/4
+Qwen 1.5             60       4        4        1/8
+DeepSeek v3          256      8        1        1/14
+OlMoE                64       8        0        1/8
+MiniMax              32       2        0        ~1/4
+Llama 4 (maverick)   128      1        1        1/2
+How do we train MoEs?
+Major challenge: we need sparsity for training-time efficiency…
+                  But sparse gating decisions are not differentiable!
+
+Solutions?
+
+1. Reinforcment learning to optimize gating policies
+2. Stochastic perturbations
+3. Heuristic ‘balancing’ losses.
+
+
+
+                     Guess which one people use in practice?
+RL for MoEs
+RL via REINFORCE does work, but not so much better that it’s a clear win
+
+
+
+
+(REINFORCE baseline approach, Clark et al 2020)
+
+
+
+               RL is the ‘right solution’ but gradient variances and complexity
+                                     means it’s not widely used
+Stochastic approximations
+
+
+
+
+From Shazeer et al 2017 – routing decisions are stochastic with gaussian perturbations.
+
+1. This naturally leads to experts that are a bit more robust.
+2. The softmax means that the model learns how to rank K experts
+   Stochastic approximations
+
+
+
+
+Stochastic jitter in Fedus et al 2022. This does a uniform multiplicative perturbation for the
+    same goal of getting less brittle experts. This was later removed in Zoph et al 2022
+Heuristic balancing losses
+Another key issue – systems efficiency requires that we use experts evenly..
+
+
+
+
+                                                                                 From the Switch Transformer [Fedus et al 2022]
+                                                        𝛼𝑁
+               The derivative with respect to 𝑝𝑖 (𝑥) is 𝑇 2 σ 1𝑎𝑟𝑔𝑚𝑎𝑥 𝑝 𝑥 =𝑖 ,
+                      so more frequent use = stronger downweighting
+Example from deepseek (v1-2)
+Per-expert balancing – same as the switch transformer
+
+
+
+
+Per-device balancing – the objective above, but aggregated by device.
+DeepSeek v3 variation – per-expert biases
+Set up a per-expert bias (making it more likely to get tokens) and use online learning
+
+
+
+
+They call this ‘auxiliary loss free balancing’
+
+
+
+
+(but the approach is not fully aux loss free..)
+What happens when removing load balancing losses?
+  Training MoEs – the systems side
+
+MoEs parallelize nicely – Each FFN   Enables additional kinds of parallelism
+          can fit in a device
+Training MoEs – the systems side
+MoE routing allows for parallelism, but also some complexities
+
+
+
+
+Modern libraries like MegaBlocks (used in many open MoEs) use smarter sparse MMs
+MoE parallelism and architecture modifications
+
+
+
+
+New ideas from Nemotron 3 – down-projecting the activations to reduce communication
+Fun side issue – stochasticity of MoE models
+MoEs can have additional stochasticity beyond normal models..
+
+Why would a MoE have additional randomness?
+
+
+
+
+     Token dropping from routing happens at a batch level – this means that
+                   other people’s queries can drop your token!
+  Issues with MoEs - stability
+
+
+
+
+                                                                                   [Zoph 2022]
+
+
+
+Solution: Use Float 32 just for the expert router (sometimes with an aux z-loss)
+Z-loss stability for the router
+
+
+
+
+What happens when we remove the z-loss?
+     Issues with MoEs – fine-tuning
+                         Sparse MoEs can overfit on smaller fine-tuning data
+
+
+
+
+Zoph et al solution – finetune non-MoE MLPs             DeepSeek solution – use lots of data 1.4M SFT
+Other training methods - upcycling
+
+
+
+
+Can we use a pre-trained LM to initialize a MoE?
+Upcycling example - MiniCPM
+Uses the MiniCPM model (topk=2, 8 experts, ~ 4B active params).
+
+
+
+
+Simple MoE, shows gains from the base model with ~ 520B tokens for training
+    Upcycling example – Qwen MoE
+    Qwen MoE – Initialized from the Qwen 1.8B model top-k=4, 60 experts w/ 4 shared.
+
+
+
+
+Similar architecture / setup to DeepSeekMoE, but one of the first (confirmed) upcycling successes
+DeepSeek MoE v1-v2-v3
+To wrap up, we’ll walk through the DeepSeek MoE architecture.
+V1 (16B – 2.8 active):
+                               Shared (2) + Fine-grained (64/4) experts
+
+
+
+
+     Standard, top-k routing                        Standard Aux-loss balancing (Expert + Device)
+DeepSeek MoE v2
+V2 (236B – 21 active):
+                                     Shared (2) + Fine-grained (160/10) experts, 6 active
+
+
+
+
+New things:
+
+              Top-M device routing                   Communication balancing loss – balancing both communication in and out
+DeepSeek MoE v3
+V2 (671B – 37 active):
+                         Shared (1) + Fine-grained (258) experts, 8 active
+
+
+
+
+New things
+
+        Sigmoid+Softmax topK + topM                                 Aux-loss-free + seq-wise aux
+Bonus: What else do you need to make DeepSeek MoE v3?
+MLA : Multihead, latent attention
+
+
+
+
+Basic idea: express the Q, K, V as functions of a lower-dim, ‘latent’ activation
+What else do you need to make DeepSeek MoE v3?
+Basic idea: express the Q, K, V as functions of a lower-dim, ‘latent’ activation
+
+
+
+
+Benefits: when KV-caching, we only need to store 𝑐𝑡𝐾𝑉 , which can be much smaller.
+   𝑊 𝑈𝐾 can be merged into the Q projection
+
+                         (they also compress queries, for memory savings during training)
+
+
+Complexity: rope conflicts with MLA-style caching.
+    Without RoPE – 𝑄, 𝐾 = ℎ𝑊 𝑄 , 𝑊 𝑈𝐾 𝑐𝑡𝐾𝑉 = ⟨ℎ 𝑊 𝑄 𝑊 𝑈𝐾 , 𝑐𝑡𝐾𝑉 ⟩
+    With RoPE - 𝑄𝑅𝑞 , 𝑅𝑘 𝐾 = ℎ𝑊 𝑄 𝑅𝑞 , 𝑅𝑘 𝑊 𝑈𝐾 𝑐𝑡𝐾𝑉 = ℎ 𝑊 𝑄 𝑅𝑞 𝑅𝑘 𝑊 𝑈𝐾 , 𝑐𝑡𝐾𝑉
+              The solution – Have a few non-latent key dimensions that can be rotated
+What else do you need to make DeepSeek MoE v3?
+MTP: Have small, lightweight models that predict multiple steps ahead
+
+
+
+
+(But they only do MTP with one token ahead)
+                                              [Deepseek v3]                           [EAGLE]
+
+
+
+
+                                                                   (See paper for ablations)
+MoE summary
+
+
+
+ ❖ MoEs take advantage of sparsity – not all inputs need the full model
+
+
+
+     ❖ Discrete routing is hard, but top-k heuristics seem to work
+
+
+
+❖ Lots of empirical evidence now that MoEs work, and are cost-effective
+

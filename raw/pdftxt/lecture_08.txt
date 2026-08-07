@@ -1,0 +1,675 @@
+  Lecture 8
+PA R A L L E L I S M B A S I C S
+
+
+           CS336
+           Tatsu H
+Outline and goals
+
+
+•   Understand the systems complexities of training huge models
+
+
+
+•   Different parallelization paradigms and why people use multiple at once
+
+
+
+•   What large scale training runs often look like
+Organization today:
+
+
+               ❖ Part 1: Basics of networking for LLMs
+
+
+
+           ❖ Part 2: Different forms of parallel LLM training
+
+
+
+        ❖ Part 3: Scaling and training big LMs with parallelism
+Limits to GPU-based scaling – compute
+
+
+
+
+There are limits to single-GPU scaling.
+   The word’s fastest supercomputers have exaflops of compute
+Limits to GPU-based scaling - memory
+Models are getting really big..
+
+
+
+
+                   A single GPU can’t fit most of these large models!
+What do we do? Multi-GPU, multi-machine parallelism
+    Intra-node parallelism
+                                        High-speed inter-node parallelism
+   via high-speed interconnects
+
+
+
+
+       Split up memory and compute requirements across GPUs and machines
+But first.. Some basics about collective communication
+                              Reduce
+All reduce
+
+
+
+                              All Gather
+
+Broadcast
+
+
+                              Reduce Scatter
+Important detail – all reduce vs reduce-scatter-gather.
+Reduce can be implemented as two steps: reduce-scatter and all-gather
+
+
+
+
+Importantly, in the bandwidth-limited regime, this is the best you can do
+TPUs vs GPUs – design differences at the comm level
+
+
+  TPU networking
+   toroidal mesh
+
+
+
+
+  GPU networking
+ All-to-all (up to 256)
+Mesh vs tree vs other
+Why mesh? Why tree?
+    Pro mesh – Cheaper to operate, can be made fast (and just do tensor parallel)
+      Pro tree/A2A – Better for less structured communications (expert parallel)
+But then things change.. TPU8i/t
+
+
+
+
+  TPU8i networking – closer to tree-style topologies (maybe for MoEs?)
+  TPU8t scale-out networking – ‘Virgo’ with switched networks
+Why not connect everything?
+Domain sizes – why not connect everything?
+
+
+
+
+                         https://newsletter.semianalysis.com/p/huawei-ai-cloudmatrix-384-chinas-answer-to-nvidia-gb200-nvl72
+Part 1 recap
+
+
+❖ New unit of compute – the datacenter
+
+❖ What we want from multi-machine scaling:
+   ❖Linear memory scaling (max model params scales with num gpus)
+   ❖Linear compute scaling (model flops scale linearly with num gpus)
+
+❖ Simple collective comms primitives
+Part 2 – Standard LLM parallelization primitives
+
+How do we parallelize LLMs? 3 important ideas
+
+•    Data parallelism
+     • Naïve data parallel
+     • ZeRO levels 1-3
+
+•    Model parallelism
+     • Pipeline parallel
+     • Tensor parallel
+
+•   Activation parallelism
+    • Sequence parallel
+Naïve data parallelism
+Starting point – imagine we are doing naïve SGD
+
+                                                  𝐵
+
+                                   𝜃𝑡+1 = 𝜃𝑡 − 𝜂 ෍ ∇𝑓(𝑥𝑖 )
+                                                  𝑖=1
+
+
+Naive parallelism: split the elements of B sized batch across M machines. Exchange gradients to
+    synchronize
+
+
+
+
+How does this do?
+   Compute scaling – each GPU gets B/M examples.
+   Communication overhead – transmits 2x # params every batch. OK if batches are big
+   Memory scaling – none. Every GPU needs # params at least
+What’s wrong with naïve data parallel?
+
+
+
+
+Memory seems like it’d be a problem – we copy the model parameters to each GPU.
+                             Let’s take a closer look..
+What’s wrong with naïve data parallelism? - Memory
+Our memory situation is actually terrible.
+
+Depending on our precision..
+
+                 We need 5 copies of weights and 16 bytes per param!
+
+-   2 bytes for FP/BF 16 model parameters
+-   2 bytes for FP/BF 16 gradients
+-   4 bytes for FP32 master weights (the thing you accumulate into in SGD)
+-   4 (or 2) bytes for FP32/BF16 Adam first moment estimates                 “Optimizer state”
+-   4 (or 2) bytes for FP32/BF16 Adam second moment estimates
+ZeRO – solving the memory overhead issue of DP
+Core idea: split up the expensive parts (state) and use the reduce-scatter equivalence.
+ZeRO stage 1. optimizer state sharding
+
+
+
+
+High level idea:
+• Split up the optimizer state (first + second moments) across GPUs
+• Everyone has the parameters + gradients
+
+Each worker is responsible for updating a subset of params (corresponding to their slice)
+ZeRO stage 1. how it works
+
+Step 1. Everyone computes a full gradient on their subset of the batch
+
+Step 2. ReduceScatter the gradients – incur #params communication cost
+
+
+
+
+Step 3. Each machine updates their param using their gradient + state.
+Step 4. All Gather the parameters – incur #params communication cost
+Comparing ZeRO stage 1 and naïve data parallel
+
+
+                         Naïve DDP                 ZeRO stage 1
+Communication            One all-reduce            One reduce scatter (send
+primitive                (gradients)               gradients) + all gather
+                                                   (collect params)
+Communication cost       2* # params               2* # params
+Memory                   (4+K) * #params           (4+K/Ngpu) * #params
+
+
+  ZeRO stage 1 is free (in the bandwidth limited regime) memory wins
+ZeRO stage 2. the simple extension to gradient sharding
+
+
+
+
+                Emboldened by our success, let’s shard even more stuff
+
+High level idea
+• Also keep the gradients (pink slices) sharded across the machines.
+• Use the same (rough) tricks as stage 1.
+
+Complexity – we can never instantiate a full gradient vector, but each worker must
+   compute a full gradient (since we’re data parallel)
+ZeRO stage 2. how it works
+Step 1. Everyone incrementally goes backward on the computation graph
+   Step 1a. After computing a layer’s gradients, immediately reduce to send this to the
+   right worker
+
+
+
+
+   Step 1b. Once gradients are not needed in the backward graph, immediately free it.
+Step 2. Each machine updates their param using their gradient + state.
+Step 3. All Gather the parameters.
+ZeRO stage 3 (aka FSDP) shard everything
+
+
+
+
+We’ve gotten almost everything for free so far.. lets try to solve all our memory issues
+
+High level idea
+• Shard everything – incl parameters!
+• Use the same ‘incremental communication / computation’ ideas
+• Send and request parameters on demand while stepping through the compute graph.
+
+                          Is it possible to do this with low overhead?
+ZeRO stage 3 (aka FSDP) how it works (baby version)
+
+
+
+
+   Communication cost – 2 all gather (#param), 1 reduce-scatter (#param).
+                                 https://pytorch.org/tutorials/intermediate/FSDP_tutorial.html
+Actual picture of how FDSP / ZeRO stage 3 works
+Let’s walk through a FSDP example to see some important ideas
+
+Incremental computation / communication
+• Parameters / gradients are requested / sent and then immediately freed
+
+Overlapping communication and computation (𝑾𝟏 𝑾𝟎 + 𝑾𝟐 𝑾𝟎 )𝒙 = 𝒚
+• The all-gathers happen all at once while forward happens, masking the comm cost.
+
+
+
+
+                                                                https://arxiv.org/pdf/2304.11277.pdf
+What’s the point?
+Distributed data parallel costs 2*# param communication
+
+What about ZeRO?
+
+•   Zero stage 1 is 2*# param – it’s free! – you might as well always do it
+
+•   Zero stage 2 is 2*# param – it’s (almost) free (ignoring overhead)
+
+•   Zero stage 3 is 3*# param – 1.5x comm cost, but that’s not bad! (ignoring latency..)
+
+
+
+This is also conceptually very simple – write a FSDP block wrapper.
+ZeRO in practice: will it fit?
+Pure BF16 training (with Kahan summation), is viable and optimizer states are less
+   beefy. Let’s say BF16 for everything but the master weights – 12 bytes per param
+
+On a 8X A100 80G..
+
+
+                             Max size (params)          Formula for B/param
+  Baseline                   6.66.. B                   12
+  Zero stage 1               16 B                       5
+  Zero stage 2               24.62 B                    2 (param) + (10
+                                                        (grad+state))/8)
+  Zero stage 3               53.33 B                    12/8
+Issues remain with data parallel – compute scaling
+With data parallel, #machines < batch size (and near this, comm overhead is high)
+
+And there’s diminishing returns to batch sizes
+Issues remain with data parallel – models don’t fit
+Zero stages 1 and 2 don’t let you scale memory
+Zero stage 3 is nice in principle, but does not reduce activation memory
+
+
+
+
+Better ways to split up the model is needed…
+Beyond data parallel – model parallelism
+Scaling up in memory (without changing batch size) with model parallelism
+
+What model parallelism is..
+    • It splits up the parameters across GPUs (like zero3)..
+    • But communicate activations (while zero3 sends params).
+
+
+We cover three different types of parallelism
+
+    1. Pipeline parallel
+    2. Tensor parallel (+ Sequence parallel)
+    3. Expert parallel
+
+These correspond to three different ways of cutting up the model.
+Layer-wise parallel
+
+
+
+
+Layer-wise parallel cuts up layers, assigns some subset to GPUS.
+Activations and partial gradients are passed back and forth
+What’s wrong with layer-wise parallel
+Utilization of layer-wise parallelism is terrible..
+
+                                                      1
+                      With n gpus, each gpu is active of the time.
+                                                      n
+
+
+
+
+Each GPU is idling most of the time, waiting for the backward pass to propagate back
+A solution: pipeline parallel
+
+
+
+
+Solution: Pipeline-parallel.
+                        Process ‘micro-batches’ (in this case, 4).
+             Send off the first microbatch and start computing the second.
+
+
+                                                   𝑛𝑠𝑡𝑎𝑔𝑒𝑠−1
+The ratio of bubble time to useful compute is ..               so we need a big batch size!
+                                                    𝑛𝑚𝑖𝑐𝑟𝑜
+Why pipeline parallel?
+Pipelines seem terrible. Why do we do it?
+
+
+
+1. Pipelines save memory (compared to DDP)
+
+2. Pipelines can have good communication properties (compared to FDSP) – it
+   depends only on activations (𝑏 × 𝑠 × ℎ) and is point to point
+
+
+
+Generally, we will use pipelines on slower network links (i.e. inter-node) as a way to get
+   better memory-wise scaling.
+Pipeline performance is highly dependent on batch size
+
+
+
+
+Batch sizes are key to hiding the bubble – otherwise pipeline rapidly degrades perf
+Trading communication bandwidth for utilization
+
+
+
+
+Some more crazy pipeline patterns can improve utilization, but at the cost of bandwidth
+‘Zero bubble’ pipelining
+
+Split up backwards into two parts
+1. Backpropagating activations (z,x)
+2. Computing weight gradients (W)
+
+The second part can be done whenever
+  Model parallel along the width axes
+  Are there model parallel schemes with better utilization?
+  We can think of pipeline parallel as cutting up along depth. What about width?
+
+
+
+
+Simple matrix multiplication observation: decompose into submatrices, add partial sums
+Tensor parallel – GPUs have submatrices
+
+
+
+
+Assign columns (A1, A2) and rows (B1, B2) to separate GPUs.
+• In the forward pass, f is the identity, and g is an all-reduce.
+• In the backward pass, f is an all-reduce, g is the identity.
+Row vs Column tensor parallel
+
+
+
+
+How do we split up in tensor parallel across a transformer block?
+• Columnwise – QKV, up-projection
+• Rowwise – Attention output, down-projection
+• Replicated – norms, routers, etc
+When do we tensor parallel?
+On GPUs, tensor parallel within a node (up to 8 GPUs) due to high speed interconnects.
+Tensor parallel – pros and cons vs pipeline parallel
+How do things compare to pipeline parallel?
+
+    Pros – no bubble. If your network is fast enough, there’s no waiting for others.
+         – low complexity – simple to ‘wrap’ models without major infra changes
+         – doesn’t need large batch sizes to work well
+
+    Cons – much larger communication than pipeline parallel.
+        •   Pipeline: 𝑏𝑠ℎ point-to-point communication per microbatch
+                           𝑛𝑑𝑒𝑣𝑖𝑐𝑒𝑠 −1
+        •   Tensor: 8𝑏𝑠ℎ                 per layer and all-reduce communication.
+                            𝑛𝑑𝑒𝑣𝑖𝑐𝑒𝑠
+
+
+
+
+   Use tensor parallel whenever we have low-latency, high-bandwidth interconnects
+A final complexity – memory is dynamic!
+Memory isn’t just the static bits, but also activations! This can be big
+A final complexity – activation memory
+Thus far, we have only really discussed parameter memory.
+
+Tensor and pipeline parallel can linearly reduce those..but what about activations?
+
+
+
+
+                                                                          [Korthikanti et al 2022]
+What’s the activation memory per layer?
+Starting point: activation memory needed if storing everything
+
+
+
+
+         𝑎𝑠
+• The 5 terms come from the quadratic attention terms incl dropout
+        ℎ
+• As with flash attention, we can drop this term via recomputation
+Activation under tensor parallel
+
+
+
+
+Tensor parallel splits out the matrix multiplies in attention + MLP
+
+The remaining 10 term is for the LayerNorm (4sbh), Dropout (2sbh), and inputs to the
+attention and MLP (4sbh). These terms alone will continue to grow with size
+Making memory truly linear – sequence parallel
+
+
+
+
+Observation: all the 10sbh terms are pointwise ops over the sequence
+   … so split up the layer norm/dropout layers along the sequence axis.
+• In the forward pass, ‘𝑔’ is an all gather, ‘ ത
+                                              𝑔’ is reduce-scatter
+• In the backward pass, the two are reversed.
+Making activation memory fully scale with more machines
+Putting it together to get full linear scaling for memory.
+Expert parallelism
+Instead of splitting up the matmul, split up the experts and route activations
+Why EP?
+EP is roughly like TP in behavior for MLPs – high bandwidth, reduces activation
+
+
+
+
+But, splitting matmuls can reduce efficiency vs routing activations
+Complexity – combining EP and others
+Naively – we can compose EP and all other strategies..
+But there are important notes – DP usually shares replicas with EP splits (so EP<DP)
+DP and TP can interact badly to lower utilization
+Complexity: Decoupling attention / expert parallelism
+Recall: MoEs apply to the MLPs, not the attention (with some exotic exceptions)
+
+This can lead to some imbalance between attention and MLPs for parallelism
+• High TP – useful for attention parallelization (since we cant use EP)
+• Low TP – useful for MLP parallelization (we’d rather EP than TP)
+
+What to do? More flexible parallelism strategies (i.e. in Megatron)
+
+
+
+
+Separates out TP/CP/DP (for attention) and (ETP/EP/EDP) for MLPs
+
+                                        https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/features/moe.html
+   Other parallelism strategies
+
+
+
+
+Context parallel / Ring attention (split activations across GPUs in a long sequence)
+         Recap: LLM parallelism table
+                                          Param memory        Activation / KV      Main bandwidth       Scales global
+Method              Comm/Sync                                                                                               Easy to use?
+                                          per rank            memory per rank      cost                 batch?
+                                          No param scaling
+                    gradient all-reduce                                            Gradient traffic ~
+DDP / ZeRO-1                              (ZeRO-1 only opt    None                                      Yes, linear in DP   Very
+                    per step                                                       O(params)
+                                          state)
+                                          ~1/DP for                                Param traffic ~
+                    Gradient all reduce
+FSDP / ZeRO-3                             params/grads/opti   None                 O(params), higher    Yes, linear in DP   Moderate
+                    – can be overlapped
+                                          mizer state                              than DDP, overlap
+                    Activation between
+                                                              Depends on           Activation traffic   No, but needs
+Pipeline parallel   layers, pipeline      ~1/PP                                                                             Hard
+                                                              pipeline buffers     between stages       microbatches
+                    bubbles
+                    Blocking                                  ~1/TP for relevant   Activation-sized
+                                          ~1/TP for TP-
+Tensor parallel     activation                                matmul activations   collectives every    No                  Hard
+                                          sharded weights
+                    communication                             w/ SP                block
+                                                              ~1/SP or 1/CP on
+Sequence /          per-layer sequence-                                            Activation / KV
+                                          None                sequence-side                             No                  Hard
+Context parallel    shard exchange                                                 communication
+                                                              activations / KV
+                                                                                                        No, but needs
+Expert parallel     token dispatch -      ~1/EP for expert                         Token-routing all-
+                                                              None                                      enough tokens per   Hard
+(MoE)               all-to-all per MoE    weights only                             to-all
+                                                                                                        expert
+Model vs Tensor parallel (TPU book)
+
+
+
+
+        Key quantity
+Global batch size (divided by GPU)
+ ‘3D (4D) parallelism’ – putting it all together
+Simple rules of thumb from the literature.
+
+1. Until your model fits in memory..
+   • Tensor / expert parallel up to GPUs / machine
+   • Pipeline parallel across machines
+   › (Or use Zero-3, depending on BW)
+
+2. Then until you run out of GPUs
+    • Scale the rest of the way with data parallel
+
+If your batch size is small.. gradient accumulate to trade higher
+batch sizes for better communication efficiency.
+Example from Metagron’s current recommendations
+The “basics”                            Plus more advanced “extras”
+
+
+
+
+                    https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/features/moe.html
+Scaling strategies from Narayanan 2021
+
+
+
+                                                                                     DP size
+
+                                                                                       32
+                                                                                       32
+                                                                                       32
+                                                                                       32
+                                                                                       32
+                                                                                       32
+                                                                                       24
+                                                                                       15
+                                                                                       9
+                                                                                       6
+
+Notes
+- Tensor parallel first up to 8, then caps out at 8.
+- Pipeline parallel goes up to make the model fit.
+- Dara parallel gradually decreases with scale, with the largest model having DP=6
+Careful ‘3D’ parallelism gives linear gains
+
+
+
+
+                   More GPUS, same, flat utilization!
+Tensor parallel = 8 is often optimal
+
+
+
+
+When parallelizing across 64 machines – it’s best to use a 8 x 8 configuration.
+Activation recomputation can pay for itself (via memory)
+
+
+
+
+Activation recomputation enables larger batches, improving throughput (t=8, p=16)
+Recent LMs – what do they do?
+
+
+
+
+            Dolma – 7B model, FDSP (probably fits intra-node)
+DeepSeek
+
+
+
+
+DeepSeek – ZeRO stage 1 with Tensor, Sequence, and Pipeline parallel
+V3 – PP (16), EP (64-way, 8 nodes), ZeRO stage 1
+    EP uses 1F1B A2A Overlap
+Yi
+
+
+
+
+Yi - ZeRO stage 1 + Tensor + Pipeline parallel
+Yi-lightning (2025) – Tensor replaced by Expert parallelism
+Llama3 405B
+
+
+
+              (Stage 1, small bsz training, Stage 2 pretraining, Stage 3 long-context)
+Llama 3 405B
+Side note – Lots of GPU failures at this scale!
+Gemma 2
+
+     For 2, 9, 27B models
+
+    ZeRO-3, MP (=TP+SP), DP
+Mixtral 8x22B
+From megatron docs –
+
+TP / PP / CP / EP (4/4/1/8) – DP likely 2 (to add up to 256GPUs)
+Nemotron 3 Super 120B-A12B
+From the long-context extension section
+
+
+
+
+                           TP / PP / CP / EP (2/0/64/64)
+Qwen 3
+225B-A22B and 30B-A3B
+
+
+
+
+Primarily expert parallel up to 8 GPUs, 2/8/32 parallelism for larger models
+       Overview table of model parallelism
+               DP             TP/SP          EP             PP             CP
+Deepseek       ?? (Zero1)     1              8              16             ??
+Deepseek v3    ?? (Zero1)     1              64             16             ??
+Yi             ?? (Zero1)     >0             1              >0             ??
+Llama3 405B    128            8              0              16             1
+Gemma 2        768            8              0              0              0
+Mixtral 8x22   2              4              8              4              1
+(megatron)
+Nemotron 3     ??             2              64             ??             64
+120B (long
+context)
+Qwen 3         ??             2              32             8              1
+(megatron)
+
+Patterns – TP generally <= 8. EP can be big (but hard!). Long context phases use large CP
+Recap for the whole lecture
+
+
+❖ Scaling beyond a certain point requires multi-gpu, multi-node parallelism
+
+
+
+
+❖ No single solution to the parallelism problem (probably want all 3 approaches)
+
+
+
+
+❖ Simple, interpretable rules of thumb for combining different forms of parallelism
+

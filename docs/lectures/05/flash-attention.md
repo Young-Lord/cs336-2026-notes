@@ -107,8 +107,6 @@ print(torch.softmax(x, dim=0))   # 应与标准 softmax 一致
 
 谢谢大家——下一讲开始进入 kernel 与 Triton，把这些思想真正写进代码。
 
----
-
 <!-- lecture-nav -->
 
 **→ 下一讲**:[06 Kernels, Triton](../06/)

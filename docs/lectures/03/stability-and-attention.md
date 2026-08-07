@@ -165,8 +165,6 @@ A:**不是**。MQA 不仅在推理时更省，训练时也更快（有位同学�
 
 下一讲（Tatsu 预告）将进入**注意力替代方案（Attention Alternatives）**，包括状态空间模型等内容。关于架构与超参数的问题，随时可以问他。
 
----
-
 <!-- lecture-nav -->
 
 **→ 下一讲**:[04 Attention Alternatives](../04/)

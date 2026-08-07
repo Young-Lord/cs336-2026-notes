@@ -40,6 +40,33 @@ PAGES_2026 = {
     "05": ["overview.md", "gpu-hardware.md", "tpu-and-strengths.md", "gpu-performance.md", "matrix-mystery.md", "flash-attention.md"],
 }
 
+LECTURES_2025 = [
+    ("01", "01 Overview and Tokenization"),
+    ("02", "02 Pytorch, Resource Accounting"),
+    ("03", "03 Architectures, Hyperparameters"),
+    ("04", "04 Mixture of Experts"),
+    ("05", "05 GPUs"),
+    ("06", "06 Kernels, Triton"),
+    ("07", "07 Parallelism 1"),
+    ("08", "08 Parallelism 2"),
+    ("09", "09 Scaling Laws 1"),
+    ("10", "10 Inference"),
+    ("11", "11 Scaling Laws 2"),
+    ("12", "12 Evaluation"),
+    ("13", "13 Data 1"),
+    ("14", "14 Data 2"),
+    ("15", "15 Alignment - SFT/RLHF"),
+    ("16", "16 Alignment - RL 1"),
+    ("17", "17 Alignment - RL 2"),
+]
+
+PAGES_2025 = {
+    "01": ["overview.md", "course-structure.md", "five-pillars.md", "tokenization-basics.md", "bpe.md"],
+    "02": ["overview.md", "memory-accounting.md", "tensor-operations.md", "compute-accounting.md", "gradients.md", "models-and-training.md"],
+    "03": ["overview.md", "normalization.md", "activations-ffn.md", "position-embeddings.md", "hyperparameters.md", "stability-and-attention.md"],
+    "04": ["overview.md", "routing.md", "experts.md", "training.md", "systems-and-stability.md", "deepseek-v3.md"],
+}
+
 
 def build_block(prev_info, next_info) -> str:
     parts = [MARKER, ""]
@@ -89,8 +116,10 @@ def apply_nav(base: Path, order: list[tuple[str, str]], pages_map: dict[str, lis
 
 
 def main() -> None:
-    root = Path("/home/niko/Projects/cs336-2026-notes")
-    apply_nav(root / "docs" / "lectures", LECTURES_2026, PAGES_2026)
+    root_2026 = Path("/home/niko/Projects/cs336-2026-notes")
+    apply_nav(root_2026 / "docs" / "lectures", LECTURES_2026, PAGES_2026)
+    root_2025 = Path("/home/niko/Projects/cs336-2025-notes")
+    apply_nav(root_2025 / "docs" / "lectures", LECTURES_2025, PAGES_2025)
 
 
 if __name__ == "__main__":

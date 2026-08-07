@@ -63,8 +63,6 @@ Tatsu 特意强调：**FlashAttention 并没有解决任何二次方成本问题
 
 下面，正式进入线性注意力的核心推导。
 
----
-
 <!-- lecture-nav -->
 
 **← 上一讲**:[03 Architectures](../03/)

@@ -67,8 +67,6 @@ lecture: 5
 
 我们一步一步来。下一节先解剖 GPU 的硬件。
 
----
-
 <!-- lecture-nav -->
 
 **← 上一讲**:[04 Attention Alternatives](../04/)

@@ -14,7 +14,7 @@ const lectures = [
   { text: "08 Parallelism", prefix: "/lectures/08/", pages: ["01-motivation-and-networking.md", "02-data-parallelism-and-zero.md", "03-pipeline-and-tensor-parallelism.md", "04-activation-sequence-expert.md", "05-scale-and-case-studies.md"] },
   { text: "09 Scaling Laws", prefix: "/lectures/09/", pages: ["01-introduction-and-history.md", "02-data-scaling-laws.md", "03-model-engineering-scaling.md", "04-data-versus-model-size.md", "05-compute-optimal-and-chinchilla.md"] },
   { text: "10 Inference", prefix: "/lectures/10/", pages: ["01-inference-overview.md", "02-arithmetic-intensity.md", "03-reducing-kv-cache.md", "04-quantization-and-pruning.md", "05-speculative-decoding.md", "06-dynamic-workloads.md"] },
-  { text: "11 Scaling Laws", prefix: "/lectures/11/", pages: [] },
+  { text: "11 Scaling Laws", prefix: "/lectures/11/", pages: ["01-introduction-and-motivation.md", "02-minicpm-scaling-recipe.md", "03-wsd-and-deepseek.md", "04-recent-scaling-recipes.md", "05-stepfun-and-optimizer-scaling.md", "06-muon-and-mup.md"] },
   { text: "12 Evaluation", prefix: "/lectures/12/", pages: [] },
   { text: "13 Data (Sources, Datasets)", prefix: "/lectures/13/", pages: [] },
   { text: "14 Data", prefix: "/lectures/14/", pages: [] },

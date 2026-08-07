@@ -42,6 +42,7 @@ PAGES_2026 = {
     "07": ["overview.md", "collectives.md", "hardware.md", "torch-distributed.md", "data-and-tensor-parallelism.md", "pipeline-parallelism.md"],
     "08": ["01-motivation-and-networking.md", "02-data-parallelism-and-zero.md", "03-pipeline-and-tensor-parallelism.md", "04-activation-sequence-expert.md", "05-scale-and-case-studies.md"],
     "09": ["01-introduction-and-history.md", "02-data-scaling-laws.md", "03-model-engineering-scaling.md", "04-data-versus-model-size.md", "05-compute-optimal-and-chinchilla.md"],
+    "10": ["01-inference-overview.md", "02-arithmetic-intensity.md", "03-reducing-kv-cache.md", "04-quantization-and-pruning.md", "05-speculative-decoding.md", "06-dynamic-workloads.md"],
 }
 
 LECTURES_2025 = [

@@ -13,7 +13,7 @@ lecture: 12
 
 ## MMLU：名为"理解"实为"知识"
 
-**Massive Multitask Language Understanding（MMLU）**是 2021 年提出的大规模多任务语言理解基准：
+**Massive Multitask Language Understanding**（MMLU）是 2021 年提出的大规模多任务语言理解基准：
 
 - **57 个科目**（数学、美国历史、法律、道德……），全部是多选题；
 - 题目"由研究生和本科生从网上自由可得的资料中收集"；
@@ -29,7 +29,7 @@ lecture: 12
 
 - **去掉了 MMLU 里有噪声的、琐碎的题目**；
 - 把选项从 4 个**扩到 10 个**；
-- 用**链式思考（chain of thought）**来评估——给模型更多发挥的机会；
+- 用**链式思考**（chain of thought）来评估——给模型更多发挥的机会；
 - 结果是模型的准确率**下降了 16% 到 33%**——说明 MMLU-Pro 不再像 MMLU 那样饱和。
 
 ![MMLU-Pro 的示例题](/lectures/12/mmlu-pro.png)
@@ -38,7 +38,7 @@ lecture: 12
 
 ## GPQA：博士级、"Google 也查不到"的问答
 
-**Graduate-Level Google-Proof Q&A（GPQA）**在"难"字上更进一步。它的题目由 **61 位来自 Upwork 的博士级承包者**编写——这些人本身就是各领域的专家。
+**Graduate-Level Google-Proof Q&A**（GPQA）在"难"字上更进一步。它的题目由 **61 位来自 Upwork 的博士级承包者**编写——这些人本身就是各领域的专家。
 
 ![GPQA 的示例题](/lectures/12/gpqa.png)
 
@@ -82,7 +82,7 @@ lecture: 12
 
 ## 基准分数的统计误差：为什么要报告置信区间
 
-讲者在这里插了一段重要的方法论提醒：**基准分数本质上是一个统计估计，必须配套报告误差**。一次评估就像一次调查：你在 $N$ 道独立题目上测出准确率 $\hat{p}$。如果把每题看成独立同分布的伯努利变量，那么答对的题数服从二项分布 $\text{Binomial}(N, p)$，准确率估计值的**标准误（standard error）**为
+讲者在这里插了一段重要的方法论提醒：**基准分数本质上是一个统计估计，必须配套报告误差**。一次评估就像一次调查：你在 $N$ 道独立题目上测出准确率 $\hat{p}$。如果把每题看成独立同分布的伯努利变量，那么答对的题数服从二项分布 $\text{Binomial}(N, p)$，准确率估计值的**标准误**（standard error）为
 
 $$\text{SE}(\hat{p}) = \sqrt{\frac{\hat{p}(1 - \hat{p})}{N}}$$
 

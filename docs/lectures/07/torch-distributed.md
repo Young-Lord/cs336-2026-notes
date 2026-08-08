@@ -10,7 +10,7 @@ lecture: 7
 ## torch.distributed 概览
 
 - `torch.distributed` 提供 collective 操作的干净接口（例如 `all_gather_into_tensor`、`all_reduce`、`reduce_scatter_tensor`）；
-- 它支持**不同的后端（backend）**以适配不同硬件：在 GPU 上用 **nccl** 后端，在 CPU 上用 **gloo** 后端——并行编程可比 GPU 早得多，你在 CPU 上同样可以跑这些 collective；
+- 它支持**不同的后端**（backend）以适配不同硬件：在 GPU 上用 **nccl** 后端，在 CPU 上用 **gloo** 后端——并行编程可比 GPU 早得多，你在 CPU 上同样可以跑这些 collective；
 - 它还支持更高级的模型与算法，比如 **FSDP（FullyShardedDataParallel）**——不过本课程**不用**这些高级封装，因为我们要从零开始、亲手搭建。
 
 ## 第一个分布式程序
@@ -53,7 +53,7 @@ def setup(rank: int, world_size: int):
 
 ### 第一个操作：all-reduce
 
-接下来做一次 all-reduce。为了让例子更有趣，每个 rank 持有一个不同的张量：rank $i$ 持有 $[0,1,2,3] + i$。`dist.all_reduce` 把 `data` **就地（in-place）**修改——它既是输入又是输出：
+接下来做一次 all-reduce。为了让例子更有趣，每个 rank 持有一个不同的张量：rank $i$ 持有 $[0,1,2,3] + i$。`dist.all_reduce` 把 `data` **就地**（in-place）修改——它既是输入又是输出：
 
 ```python
 ### All-reduce（dist = torch.distributed）
@@ -112,7 +112,7 @@ dist.all_gather_into_tensor(output_tensor=output, input_tensor=input, async_op=F
 print(f"Rank {rank} [after all-gather]: input = {input}, output = {output}", flush=True)
 ```
 
-all-gather 之后，每个 rank 上的 output 都是 $[6, 10, 14, 18]$——于是你亲眼看到了一个**"用例子证明"**：
+all-gather 之后，每个 rank 上的 output 都是 $[6, 10, 14, 18]$——于是你亲眼看到了一个"**用例子证明**"：
 
 > **all-reduce = reduce-scatter + all-gather。**
 
@@ -134,7 +134,7 @@ all-gather 之后，每个 rank 上的 output 都是 $[6, 10, 14, 18]$——于�
 
 ## 基准测试：通信到底有多快
 
-这段会比较快，因为我想早点进入第二部分。**通信到底有多快？**我们来测 all-reduce 和 reduce-scatter 的有效带宽（这跟上一讲算 MFU 的思路是同一个：算出"应该搬了多少字节"，除以耗时）。
+这段会比较快，因为我想早点进入第二部分。**通信到底有多快**？我们来测 all-reduce 和 reduce-scatter 的有效带宽（这跟上一讲算 MFU 的思路是同一个：算出"应该搬了多少字节"，除以耗时）。
 
 ### 测量 all-reduce
 

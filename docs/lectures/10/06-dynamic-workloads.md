@@ -22,7 +22,7 @@ lecture: 10
 Orca 的做法是**迭代级调度（iteration-level scheduling）**：不是等整个 batch 都生成完，而是**一步一步地解码**：
 
 - 每一步，为当前 batch 里的所有序列各解码一个 token；
-- 如果某个序列生成完了，就把它**移出（evict）**batch；
+- 如果某个序列生成完了，就把它**移出**（evict）batch；
 - 新请求到达时，随时**加入** batch。
 
 所以"连续"的意思是：batch 是**动态更新**的——完成的老序列被移走、新序列被加进来。这样服务端就不需要为了凑一个 batch 而等待。
@@ -48,7 +48,7 @@ Orca 的做法是**迭代级调度（iteration-level scheduling）**：不是等
 
 ![传统分配带来的碎片化](/lectures/10/paged-attention-fragmentation.png)
 
-这有严重的**碎片化（fragmentation）**问题——就像当年硬盘的碎片化，还得定期 defrag：
+这有严重的**碎片化**（fragmentation）问题——就像当年硬盘的碎片化，还得定期 defrag：
 
 - **内部碎片化（internal fragmentation）**：你按"最大长度"分配了一整段内存，但实际生成可能远没有那么多 token——多出来的内存白白占着，放不了别的东西；
 - **外部碎片化（external fragmentation）**：不同请求之间留下的空隙太小，无法被有效利用，纯粹浪费。
@@ -70,7 +70,7 @@ Orca 的做法是**迭代级调度（iteration-level scheduling）**：不是等
 - **共享系统提示**：很多人用同一个系统提示（system prompt），那就把系统提示的 KV cache **只算一次**、让所有请求复用——省下每个请求重算 KV cache 的开销；
 - **一个 prompt 生成多个响应**：很多应用需要对同一个 prompt 采样多个不同输出（比如程序综合里采样多份候选程序）——共享 prompt 部分的 KV cache，只让响应部分各自独立。
 
-后一种场景用到了**写时复制（copy-on-write）**语义：
+后一种场景用到了**写时复制**（copy-on-write）语义：
 
 ![共享前缀 + 写时复制：多个生成从同一前缀分叉](/lectures/10/paged-attention-parallel.png)
 
@@ -89,7 +89,7 @@ vLLM 还有一堆别的优化（讲者时间有限没细讲），比如：把块
 - **推理非常重要**：实际使用、评测、强化学习里都离不开它；
 - **推理与训练非常不同**：同一个模型，但你让它做的事很不一样——推理是**访存受限**的，而且（在实时服务里）是**动态**的；
 - **一大类技术**：新架构（GQA、MLA、CLA、局部注意力）、量化、剪枝/蒸馏、投机采样——它们背后的统一原则是：**减小 KV cache、不伤精度**；
-- **系统思想**：从操作系统借鉴的**投机执行（speculative execution）**与**分页（paging）**，可以直接用在真实的推理服务器上。
+- **系统思想**：从操作系统借鉴的**投机执行**（speculative execution）与**分页（paging）**，可以直接用在真实的推理服务器上。
 
 最后，讲者想强调一个前面没来得及展开的点：**新架构对推理有巨大的改进潜力**。像状态空间模型（state-space model）、线性注意力、扩散模型这类架构，在某种意义上直接绕开了 Transformer 的痛点——**KV cache 与注意力本质上让 Transformer 成为一个"对推理不友好"的架构**。如果你能发明一个像 Transformer 那样强大、但天生为推理设计的架构，可能会解锁巨大的收益。
 

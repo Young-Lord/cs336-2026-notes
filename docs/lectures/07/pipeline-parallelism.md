@@ -58,7 +58,7 @@ def pipeline_parallelism_main(rank: int, world_size: int, data: tensor, num_laye
     ...
 ```
 
-本地层数 `local_num_layers` 是本 rank 要处理的层数；`local_params` 里只有这么多层（每层是完整的 $1024 \times 1024$）。这里用到了前面没提过的 **send / recv** 这两个**点对点（point-to-point）**操作，它们的语义很直白：`dist.recv(tensor=x, src=rank-1)` 说"我要从 rank-1 接收这个张量"，`dist.send(tensor=x, dst=rank+1)` 说"我要把张量 x 发给 rank+1"。
+本地层数 `local_num_layers` 是本 rank 要处理的层数；`local_params` 里只有这么多层（每层是完整的 $1024 \times 1024$）。这里用到了前面没提过的 **send / recv** 这两个**点对点**（point-to-point）操作，它们的语义很直白：`dist.recv(tensor=x, src=rank-1)` 说"我要从 rank-1 接收这个张量"，`dist.send(tensor=x, dst=rank+1)` 说"我要把张量 x 发给 rank+1"。
 
 ### 为什么要 micro-batch？pipeline bubble 的推导
 

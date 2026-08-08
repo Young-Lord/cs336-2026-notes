@@ -11,7 +11,7 @@ lecture: 18
 
 ### decode 的根本挑战
 
-decode 阶段的基本难题我们已经很熟悉：**为了生成一个 token，你必须把整个模型跑一遍**。这等于说，你把 GPU 这个大规模并行机器，变成了一个**"光荣的内存加载器"（glorified memory loader）**——prefill 和训练时能用的海量并行，在这里都使不上劲。
+decode 阶段的基本难题我们已经很熟悉：**为了生成一个 token，你必须把整个模型跑一遍**。这等于说，你把 GPU 这个大规模并行机器，变成了一个"**光荣的内存加载器**"（glorified memory loader）——prefill 和训练时能用的海量并行，在这里都使不上劲。
 
 让事情雪上加霜的是我们**写 kernel 的方式**。通常我们是一个运算写一个 kernel（kernel-per-operation）：写出 norm kernel、matmul kernel、attention kernel……这样编程确实简单多了（你只需要专心写好某一个运算），但它会在系统里**引入大量停机时间（downtime）**。
 
@@ -43,7 +43,7 @@ Dan 团队的对策是 **MegaKernel**：**不再为模型里的每个运算各�
 
 ### ThunderKittens 与结果
 
-为了写出这种 kernel，Dan 团队搭了一个相当复杂的 CUDA 框架——**ThunderKittens**。它采用一种**指令级（instruction-based）抽象**：每个子 kernel 可以在自己的文件里实现，然后由一个**大的虚拟化共享内存系统（virtualized shared memory system）**来编排这些子 kernel 的运行。你可以把它理解成一个 kernel 编写库，几乎像 Triton、但更低层、对硬件有**精细得多**的控制。
+为了写出这种 kernel，Dan 团队搭了一个相当复杂的 CUDA 框架——**ThunderKittens**。它采用一种**指令级（instruction-based）抽象**：每个子 kernel 可以在自己的文件里实现，然后由一个**大的虚拟化共享内存系统**（virtualized shared memory system）来编排这些子 kernel 的运行。你可以把它理解成一个 kernel 编写库，几乎像 Triton、但更低层、对硬件有**精细得多**的控制。
 
 收益是**接近光速的 decode**：
 
@@ -59,7 +59,7 @@ Dan 的总结：**对 kernel 的深层控制、对硬件的深入理解，可以
 
 本讲开头提到，新能力来自缩放——参数变多、数据变多。**Parcae** 想问的是：**这是唯一的缩放方式吗？有没有别的办法获得同样的质量？**
 
-Parcae 是 Dan 团队对一种叫**循环 Transformer（looped transformer）**技术的诠释：取出 Transformer 的一些 block，让它们在循环里反复执行。token 不是一层层地单向穿过模型，而是走到某个位置后**被送回同一个 block 循环若干次**（图上那个紫色的 recurrent block），然后再继续往下走。
+Parcae 是 Dan 团队对一种叫**循环 Transformer**（looped transformer）技术的诠释：取出 Transformer 的一些 block，让它们在循环里反复执行。token 不是一层层地单向穿过模型，而是走到某个位置后**被送回同一个 block 循环若干次**（图上那个紫色的 recurrent block），然后再继续往下走。
 
 这么做有几方面的吸引力：
 
@@ -118,7 +118,7 @@ $$2^{16} = 65536$$
 
 然后他们跑了初步的**缩放定律（scaling laws）**。背景是几年前的经典问题：**该把模型做大，还是该喂更多数据？** 当时得到一堆复杂的幂律曲线——识别它们有一个要点：**曲线向右下走，说明数据和参数应该一起缩放**；垂直向下说明"只加数据就够了"；水平向右说明"别加数据、只加参数"。现实是曲线向右下走：训练 1 万亿参数的模型、喂 35 万亿 token，质量更好。
 
-那**循环（recurrence）**在这张图里处于什么位置？有几种可能：永远不要循环；大量循环；或者适度循环。Dan 团队展示的初始缩放定律（所有曲线**等参（isoparametric）**、**等 FLOP（isoflop）**：每条曲线对应一个固定参数量的模型，左边右边参数相同，颜色变化 = 训练数据（即训练 FLOPs）增加），同时变化**数据量**和**循环次数**。结果两种设定下都看到了熟悉的"向右下"趋势——这意味着：
+那**循环**（recurrence）在这张图里处于什么位置？有几种可能：永远不要循环；大量循环；或者适度循环。Dan 团队展示的初始缩放定律（所有曲线**等参（isoparametric）**、**等 FLOP（isoflop）**：每条曲线对应一个固定参数量的模型，左边右边参数相同，颜色变化 = 训练数据（即训练 FLOPs）增加），同时变化**数据量**和**循环次数**。结果两种设定下都看到了熟悉的"向右下"趋势——这意味着：
 
 > **在固定参数量的前提下，数据越多，你应该循环得越多。**
 

@@ -9,7 +9,7 @@ lecture: 1
 
 ## 起点：文本是字符串，语言模型操作的是 token
 
-出发点很简单：**原始文本是 Unicode 字符串**；而另一方面，**语言模型是在 token 序列上建立概率分布**的，这些 token 通常用整数索引来表示。例如 `"Hello, 🌍! 你好!"` 这样的字符串，经过编码后得到的是形如 `[15496, 11, 995, 0]` 的索引序列。因此我们需要两个过程：一个把字符串**编码（encode）**成 token，另一个把 token **解码（decode）**回字符串。所谓 tokenizer，就是能够完成这趟**往返（round trip）**的东西。Percy 强调："如果你实现的 tokenizer 不能往返，那你就有麻烦了。"检查的方法很直接：对同一个字符串，先 encode 再 decode，然后断言结果与原字符串一致（相当于代码里的 `assert string == reconstructed_string`）。
+出发点很简单：**原始文本是 Unicode 字符串**；而另一方面，**语言模型是在 token 序列上建立概率分布**的，这些 token 通常用整数索引来表示。例如 `"Hello, 🌍! 你好!"` 这样的字符串，经过编码后得到的是形如 `[15496, 11, 995, 0]` 的索引序列。因此我们需要两个过程：一个把字符串**编码**（encode）成 token，另一个把 token **解码**（decode）回字符串。所谓 tokenizer，就是能够完成这趟**往返**（round trip）的东西。Percy 强调："如果你实现的 tokenizer 不能往返，那你就有麻烦了。"检查的方法很直接：对同一个字符串，先 encode 再 decode，然后断言结果与原字符串一致（相当于代码里的 `assert string == reconstructed_string`）。
 
 为了让大家对 tokenizer 的行为有个感觉，他本想演示一个交互式网站（可以在上面试不同 tokenizer），但临时发现没有网络——"我该早点试网络的，所以这个演示没法做了"——于是转而直接给出几个观察。
 
@@ -23,11 +23,11 @@ Percy 说，这些观察会让你体会到为什么 tokenizer 有点烦人、为
 
 ## GPT-5 tokenizer 与压缩率
 
-Percy 现场展示了 OpenAI 的 **GPT-5 tokenizer（来自 tiktoken 库）**。它把 `"Hello, 🌍! 你好!"` 编码成一串索引，再解码回字符串，能够完美往返。这里引出了**压缩率（compression ratio）**的概念：
+Percy 现场展示了 OpenAI 的 **GPT-5 tokenizer（来自 tiktoken 库）**。它把 `"Hello, 🌍! 你好!"` 编码成一串索引，再解码回字符串，能够完美往返。这里引出了**压缩率**（compression ratio）的概念：
 
 $$ \text{compression ratio} = \frac{\text{bytes}}{\text{tokens}} $$
 
-在这个例子里，字符串一共 20 字节、被切成 8 个 token，于是压缩率是 $20 / 8 = 2.5$，即 **2.5 bytes per token**。**压缩率越大，序列就越短，这是好事**——因为 attention 的计算量随序列长度二次增长，你当然希望序列尽量短。理论上，你可以通过**增大词表大小**来提高压缩率，但那样会陷入**稀疏性(sparsity)**问题：词表里的每个元素都被当作一个不同的元素来对待。如今，尤其是多语言的 tokenizer，词表通常有 **10 万到 20 万个**不同的 token。课堂上本来可以顺带看一眼 GPT tokenizer 的实际词表长什么样，不过为了节省时间，Percy 略过了这一步。
+在这个例子里，字符串一共 20 字节、被切成 8 个 token，于是压缩率是 $20 / 8 = 2.5$，即 **2.5 bytes per token**。**压缩率越大，序列就越短，这是好事**——因为 attention 的计算量随序列长度二次增长，你当然希望序列尽量短。理论上，你可以通过**增大词表大小**来提高压缩率，但那样会陷入**稀疏性**(sparsity)问题：词表里的每个元素都被当作一个不同的元素来对待。如今，尤其是多语言的 tokenizer，词表通常有 **10 万到 20 万个**不同的 token。课堂上本来可以顺带看一眼 GPT tokenizer 的实际词表长什么样，不过为了节省时间，Percy 略过了这一步。
 
 ![](/lectures/01/tokenized-example.png)
 

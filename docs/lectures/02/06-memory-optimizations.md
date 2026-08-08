@@ -5,7 +5,7 @@ lecture: 2
 
 # 降低内存的两种技巧与总结
 
-上一节的内存分解里，激活这一项（$2BDL$）会随 batch size 线性增长。这一节讲两个“用计算换内存”的经典技巧：**梯度累积（gradient accumulation）**与**激活检查点（activation checkpointing）**，最后总结整讲。
+上一节的内存分解里，激活这一项（$2BDL$）会随 batch size 线性增长。这一节讲两个“用计算换内存”的经典技巧：**梯度累积**（gradient accumulation）与**激活检查点（activation checkpointing）**，最后总结整讲。
 
 ## 为什么想上更大的 batch
 

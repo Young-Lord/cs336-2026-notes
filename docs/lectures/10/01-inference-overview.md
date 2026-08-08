@@ -41,7 +41,7 @@ lecture: 10
 
 ## 训练与推理的根本差异
 
-无论用上面哪个度量衡量效率，有一个**全讲最重要的一句话（high-level takeaway）**：训练时你**一次性看到所有 token**。在监督式微调里，你看到全部 token，可以**沿序列并行化（parallelize over the sequence）**。回想 Transformer 里的注意力与 MLP 计算——序列只是一个维度，是一大块张量，你可以把所有 token 一次处理完。而推理做不到：由于**自回归（autoregressive）**的特性，你必须**逐 token、顺序地生成**。这就是为什么推理是与训练非常不同的工作负载——你不能沿序列并行，因此很难达到高算术强度（arithmetic intensity）、很难让计算单元满负荷运转。
+无论用上面哪个度量衡量效率，有一个**全讲最重要的一句话（high-level takeaway）**：训练时你**一次性看到所有 token**。在监督式微调里，你看到全部 token，可以**沿序列并行化（parallelize over the sequence）**。回想 Transformer 里的注意力与 MLP 计算——序列只是一个维度，是一大块张量，你可以把所有 token 一次处理完。而推理做不到：由于**自回归**（autoregressive）的特性，你必须**逐 token、顺序地生成**。这就是为什么推理是与训练非常不同的工作负载——你不能沿序列并行，因此很难达到高算术强度（arithmetic intensity）、很难让计算单元满负荷运转。
 
 ![推理的基本图景：给定 prompt，逐 token 生成响应](/lectures/10/inference-schema.png)
 
@@ -81,7 +81,7 @@ MLP 把模型维度 $D$ 上投影到 4 倍维度，所以看到 $F$ 就把它想
 
 $$D = N \cdot H$$
 
-而头的个数在**分组查询注意力（grouped-query attention，GQA）**的情况下按"组"进一步划分：
+而头的个数在**分组查询注意力**（grouped-query attention，GQA）的情况下按"组"进一步划分：
 
 $$N = K \cdot G$$
 

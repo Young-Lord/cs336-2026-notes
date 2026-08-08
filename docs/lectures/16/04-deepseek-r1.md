@@ -105,7 +105,7 @@ R1 的 RL 部分与 R1-Zero 基本一样，只是多了一个**语言一致性�
 
 ## 失败尝试的章节：PRM 与 MCTS
 
-R1 技术报告里还有一个完整的"**不成功的尝试**"（unsuccessful attempts）章节，这本身也很有价值：**过程奖励模型（PRM，如 PRM800k、DeepSeekMath 里的做法）**和 **MCTS** 都没有带来预想的效果。结合前面说的"放弃过程监督"，信息很一致：对这类 RLVR 问题，**结果监督配 GRPO 已经足够**，过程监督与树搜索并非必需。
+R1 技术报告里还有一个完整的"**不成功的尝试**"（unsuccessful attempts）章节，这本身也很有价值：**过程奖励模型**（PRM，如 PRM800k、DeepSeekMath 里的做法）和 **MCTS** 都没有带来预想的效果。结合前面说的"放弃过程监督"，信息很一致：对这类 RLVR 问题，**结果监督配 GRPO 已经足够**，过程监督与树搜索并非必需。
 
 ![R1 报告中的"不成功尝试"章节：PRM（PRM800k、DeepSeekMath）与 MCTS](/lectures/16/slide-38.png)
 

@@ -31,7 +31,7 @@ $$\text{block}(x) = x + \text{Attn}(\text{LN}(x)), \qquad x \leftarrow x + \text
 
 ### 真正的解释:梯度衰减与梯度尖峰
 
-但随着网络变深、稳定性问题凸显,人们意识到把 LayerNorm 移出残差流有更重要的含义。Tatsu 认为最清晰的是**梯度衰减(gradient attenuation)**问题。做架构设计的人常挂在嘴边的一句话是:**"保持你的残差流干净(keep your residual stream clean)"**。在 pre-norm 下,输入 $x$ 从网络底部一路直通到顶部输出,这条**恒等(identity)通路**让梯度在反向传播时可以"直线穿透",于是:
+但随着网络变深、稳定性问题凸显,人们意识到把 LayerNorm 移出残差流有更重要的含义。Tatsu 认为最清晰的是**梯度衰减**(gradient attenuation)问题。做架构设计的人常挂在嘴边的一句话是:**"保持你的残差流干净(keep your residual stream clean)"**。在 pre-norm 下,输入 $x$ 从网络底部一路直通到顶部输出,这条**恒等(identity)通路**让梯度在反向传播时可以"直线穿透",于是:
 
 - **梯度传播非常漂亮**:pre-norm 下,从初始化开始,各层的梯度大小基本保持不变;而 post-norm 下,每穿过一个 transformer block 都要做一次 LayerNorm,这会不断改变梯度的范数,带来各种复杂效应;
 - **稳定性更好**:实验显示,pre-norm 相比 post-norm,梯度尖峰(gradient spikes)的**大小和频率**都显著改善。这张图来自 Salazar 与 Nguyen(2019),他们是最早仔细研究这一现象的团队之一。
@@ -84,7 +84,7 @@ $$y = \frac{x}{\sqrt{\frac{1}{d}\sum_i x_i^2 + \varepsilon}} \cdot \gamma$$
 
 (图中的白色部分是算术强度、黑色部分是 FLOPs:可以看到 LayerNorm 的算术强度非常低——这正是我们最想删掉的那种操作。)
 
-这正是**系统与架构协同设计(co-design)**开始介入的地方:Percy 在上一讲提到的**算术强度(arithmetic intensity)**概念——我们想让 GPU 保持"火热",尽量多做矩阵乘法这类高强度运算,而不是浪费在搬来搬去小块内存上。按这个观点:**既然减均值、加 bias 并没有带来多少表达力,那就把它删掉。**
+这正是**系统与架构协同设计**(co-design)开始介入的地方:Percy 在上一讲提到的**算术强度**(arithmetic intensity)概念——我们想让 GPU 保持"火热",尽量多做矩阵乘法这类高强度运算,而不是浪费在搬来搬去小块内存上。按这个观点:**既然减均值、加 bias 并没有带来多少表达力,那就把它删掉。**
 
 ### 问答:为什么归一化的数据搬运如此不成比例?
 

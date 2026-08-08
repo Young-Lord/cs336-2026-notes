@@ -11,7 +11,7 @@ lecture: 7
 
 这一讲是系统部分的第三站：上一讲（第六讲）我们学会让**一块** GPU 变快（写 kernel、tiling、算子融合），这一讲把视野从一块 GPU 扩展到**多块 GPU**——如何在四块、甚至上千块 GPU 上把训练搬起来。本讲是一堂"可执行讲座（executable lecture）"：课程讲义本身是一段 Python 程序，幻灯片内容、collective 示意图、基准测试、三种并行策略的朴素实现全部写在代码里，可以直接运行（直接运行会走 multiprocessing；逐行 trace 时则退化为单进程、把分布式调用替换为空操作）。
 
-讲次分为两大部分。**第一部分**是分布式通信与计算的积木（building blocks）：先讲**集合通信原语（collective operations）**这个源自 1980 年代并行编程的编程模型（broadcast、scatter、gather、reduce、all-gather、reduce-scatter、all-reduce、all-to-all）；再讲**硬件**——GPU 究竟怎么连在一起（NVLink/NVSwitch、InfiniBand、Ethernet、RDMA，以及 NCCL 这个把 collective 落到包级别的库）；最后落到 **PyTorch**——用 `torch.distributed` 亲手实现这些操作，并像上一讲算 MFU 一样测量**有效通信带宽**。**第二部分**是三种分布式训练策略：**数据并行**（沿 batch 维切）、**张量并行**（沿宽度维切）、**流水线并行**（沿深度维切），全部用深度 MLP 演示（MLP 正是 Transformer 里真正的计算瓶颈，因此很有代表性），并分别讨论它们的**通信量**与**显存**代价。
+讲次分为两大部分。**第一部分**是分布式通信与计算的积木（building blocks）：先讲**集合通信原语**（collective operations）这个源自 1980 年代并行编程的编程模型（broadcast、scatter、gather、reduce、all-gather、reduce-scatter、all-reduce、all-to-all）；再讲**硬件**——GPU 究竟怎么连在一起（NVLink/NVSwitch、InfiniBand、Ethernet、RDMA，以及 NCCL 这个把 collective 落到包级别的库）；最后落到 **PyTorch**——用 `torch.distributed` 亲手实现这些操作，并像上一讲算 MFU 一样测量**有效通信带宽**。**第二部分**是三种分布式训练策略：**数据并行**（沿 batch 维切）、**张量并行**（沿宽度维切）、**流水线并行**（沿深度维切），全部用深度 MLP 演示（MLP 正是 Transformer 里真正的计算瓶颈，因此很有代表性），并分别讨论它们的**通信量**与**显存**代价。
 
 | 页面 | 内容 |
 |------|------|
@@ -25,7 +25,7 @@ lecture: 7
 ## 本讲要点
 
 - **多 GPU 的动机只有两个**：① 模型（参数 + 梯度 + 优化器状态 + 激活）放不进单卡显存——B200 有 192 GB，但 1 万亿参数的模型远远放不下；② 即使放得下，也要用更多 GPU 的算力训练得更快。两者的权衡（少卡省通信 vs 多卡多通信）就是你要做的计算；
-- **核心心智模型**：无论单卡还是多卡，"计算离数据远"这一本质没变——单卡时数据在 HBM，多卡时数据可能在另一块 GPU 上，都需要把数据搬来搬去。游戏始终是**编排计算以避开数据传输瓶颈**：上一讲靠融合与 tiling 减少访存，这一讲靠**复制（replicate）与切分（shard）**减少跨 GPU 通信；
+- **核心心智模型**：无论单卡还是多卡，"计算离数据远"这一本质没变——单卡时数据在 HBM，多卡时数据可能在另一块 GPU 上，都需要把数据搬来搬去。游戏始终是**编排计算以避开数据传输瓶颈**：上一讲靠融合与 tiling 减少访存，这一讲靠**复制（replicate）与切分**（shard）减少跨 GPU 通信；
 - **广义内存层级**：L1 cache/shared memory（最快）→ HBM（上一讲嫌它慢，这一讲要把它当"快"的）→ NVLink/NVSwitch（单节点多卡，B200 的 NVLink 5.0 约 1.8 TB/s，约为 HBM 8 TB/s 的 1/4）→ InfiniBand（跨节点，约 0.05 TB/s）→ Ethernet（跨 pod，最慢）；"GPU 越多越慢"和"内存越大越慢"是同一件事；
 - **collective 是 1980 年代的并行编程原语**，今天仍是大模型训练的基石："collective"意味着你只声明一种**通用的通信模式**，由系统去编排，而不是手动管理点对点通信。用三个词就能记住术语：**reduce** 做可结合可交换的运算（sum/min/max），**scatter** 是 **gather** 的逆（分发 vs 汇聚），**all** 表示目的地是所有设备；
 - **三种主力原语**：**all-gather**（每块 GPU 持有参数分片，前向需要完整参数时把它汇聚到所有卡）、**reduce-scatter**（反向后把各卡不同数据算出的梯度按分片求和并分散存储）、**all-reduce = reduce-scatter + all-gather**（DDP 每步同步梯度用的就是这个；拆开做正是 FSDP/ZeRO 的灵活性来源）；**all-to-all** 是 MoE 里"把数据路由给专家"的操作，均衡切分时等价于矩阵转置；

@@ -30,7 +30,7 @@ lecture: 7
 
 ## 上一讲 vs 这一讲：减少访存 vs 减少通信
 
-上一讲我们讲了不少**改进内存访问**的技巧：**融合（fusion）**与**分块（tiling）**——读进 shared memory，尽可能在里面把事做完，再写回去。这一讲我们要讲的是**如何减少跨 GPU 的通信量**，手段是适当地**复制（replicate）与切分（shard）**。你在脑子里可以把两条线对齐：上一讲优化的是"数据在 SM 与 HBM 之间的移动"，这一讲优化的是"数据在 GPU 与 GPU 之间的移动"。
+上一讲我们讲了不少**改进内存访问**的技巧：**融合**（fusion）与**分块（tiling）**——读进 shared memory，尽可能在里面把事做完，再写回去。这一讲我们要讲的是**如何减少跨 GPU 的通信量**，手段是适当地**复制（replicate）与切分（shard）**。你在脑子里可以把两条线对齐：上一讲优化的是"数据在 SM 与 HBM 之间的移动"，这一讲优化的是"数据在 GPU 与 GPU 之间的移动"。
 
 ## 为什么需要多 GPU？
 
@@ -47,7 +47,7 @@ lecture: 7
 
 本讲分两大部分：
 
-- **第一部分：分布式通信与计算的积木（building blocks）**。先讲**编程模型**（集合通信原语 collective operations），再讲一点**硬件**（GPU 怎么连），然后落到 **PyTorch** 里的实现——这也正是你**作业二（assignment 2）**要做的事；
+- **第一部分：分布式通信与计算的积木（building blocks）**。先讲**编程模型**（集合通信原语 collective operations），再讲一点**硬件**（GPU 怎么连），然后落到 **PyTorch** 里的实现——这也正是你**作业二**（assignment 2）要做的事；
 - **第二部分：真正的训练**。看三种并行策略——**数据并行（data parallelism）**、**张量并行（tensor parallelism）**、**流水线并行（pipeline parallelism）**，它们各自以不同方式"切"模型。演示用的是**深度 MLP**（而不是完整的 Transformer），因为 MLP 正是 Transformer 里真正的计算瓶颈所在，核心计算完全能说明问题。
 
 <!-- lecture-nav -->

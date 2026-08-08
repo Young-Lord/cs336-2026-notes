@@ -48,7 +48,7 @@ lecture: 6
 
 ## 实现：先回顾 stride
 
-进入代码之前，先复习一个概念——**stride（步长）**。一个 tensor 是多维数组，但在内存里是**线性化（linearized）**存储的。stride 告诉我们如何把多维下标（如“第 $r$ 行第 $c$ 列”）映射成内存偏移：
+进入代码之前，先复习一个概念——**stride（步长）**。一个 tensor 是多维数组，但在内存里是**线性化**（linearized）存储的。stride 告诉我们如何把多维下标（如“第 $r$ 行第 $c$ 列”）映射成内存偏移：
 
 $$\text{index} = r \times \text{stride\_row} + c \times \text{stride\_col}$$
 

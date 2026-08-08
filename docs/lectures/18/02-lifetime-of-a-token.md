@@ -55,8 +55,8 @@ lecture: 18
 1. **分词（tokenize）**：进来一段文本，先把它 tokenize 成 token（这你肯定熟悉）；
 2. **缓存检查**：一旦有了 token，就进入一个相当复杂的调度流程——要问"**我见过这些 token 吗？能不能直接查表得到某些激活（activations）？**"；
 3. **prefill 与 decode**：然后是两块主要的 ML 计算——**prefill** 和 **decode**，它们非常不同：
-   - **prefill（预填充）**：假设你有 1 万个从未见过的 token，要一次性算出它们的激活与逻辑（logits）。**1 万 token 进、1 个 token 出**，这是一次**计算受限（compute-bound）**的操作——实际上它长得非常像训练：训练时你有一大堆 token、写 Flash Attention kernel、跑训练循环，prefill 几乎一样，只是**不跑反向传播（backward pass）**；
-   - **decode（解码）**：然后开始**一次生成一个 token**。你把这些 token 传进去（"这是我的代码库，告诉我函数 ABC 是干什么的"），模型处理完整个 prompt 之后开始逐个生成 token——没有投机解码时每次一个，有投机解码（speculative decoding）时可能一次三四个。关键观察：**每生成一个新 token，都要把整个模型再跑一遍**。算一下就会知道，这一步需要的 FLOPs 其实不多，所以它是**访存带宽受限（memory-bandwidth-bound）**的——你必须每次把整个模型权重重新加载一遍，只为生成一个 token；
+   - **prefill（预填充）**：假设你有 1 万个从未见过的 token，要一次性算出它们的激活与逻辑（logits）。**1 万 token 进、1 个 token 出**，这是一次**计算受限**（compute-bound）的操作——实际上它长得非常像训练：训练时你有一大堆 token、写 Flash Attention kernel、跑训练循环，prefill 几乎一样，只是**不跑反向传播（backward pass）**；
+   - **decode（解码）**：然后开始**一次生成一个 token**。你把这些 token 传进去（"这是我的代码库，告诉我函数 ABC 是干什么的"），模型处理完整个 prompt 之后开始逐个生成 token——没有投机解码时每次一个，有投机解码（speculative decoding）时可能一次三四个。关键观察：**每生成一个新 token，都要把整个模型再跑一遍**。算一下就会知道，这一步需要的 FLOPs 其实不多，所以它是**访存带宽受限**（memory-bandwidth-bound）的——你必须每次把整个模型权重重新加载一遍，只为生成一个 token；
 4. **输出后处理**：模型前向的最后，你得到一个表示 token 的数字，把它转成字符串，可能还要做一点处理：**找停止符（stop tokens）**、跑**安全检查**（比如"用户是不是在试图黑进系统"）等等；
 5. **循环**：输出给到用户之后，推理引擎真的就是**一直在跑这个循环**——等待请求进来、调度、执行、采样 token（scheduling-execution-token sampling loop）。
 

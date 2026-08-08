@@ -5,7 +5,7 @@ lecture: 10
 
 # 算术强度与推理核算：为什么推理是访存受限的
 
-这一节是本讲的数学核心。我们要做三件事：先复习**算术强度（arithmetic intensity）**的概念并算一个矩阵乘法的账；然后把它应用到 Transformer 的 MLP 与注意力层，区分 prefill 与 generation 两个阶段；最后用这些结论核算一个真实模型（Llama 2 13B）在 H100 上的吞吐与延迟。
+这一节是本讲的数学核心。我们要做三件事：先复习**算术强度**（arithmetic intensity）的概念并算一个矩阵乘法的账；然后把它应用到 Transformer 的 MLP 与注意力层，区分 prefill 与 generation 两个阶段；最后用这些结论核算一个真实模型（Llama 2 13B）在 H100 上的吞吐与延迟。
 
 ## 复习：矩阵乘法的算术强度
 

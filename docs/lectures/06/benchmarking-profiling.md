@@ -13,7 +13,7 @@ lecture: 6
 
 ## Benchmarking：代码要花多久？
 
-**Benchmarking（基准测试）**测量的是执行某个操作的**墙钟时间（wall-clock time）**——它只给你一个端到端的时间，**不告诉你时间花在了哪里**（那是 profiling 的事）。
+**Benchmarking**（基准测试）测量的是执行某个操作的**墙钟时间（wall-clock time）**——它只给你一个端到端的时间，**不告诉你时间花在了哪里**（那是 profiling 的事）。
 
 尽管如此，它依然非常有用：
 
@@ -179,7 +179,7 @@ compiled_time = benchmark(run_operation1(dim=16384, operation=compiled_gelu))
 
 对三个实现分别做 profiling：
 
-- **naive_gelu**：profiler 里出现**一堆不同的 kernel**——`binary`（二元运算）、`unary`（一元运算）、`add`、`tanh`……每一个都是一次独立的 kernel 启动。原因在于：PyTorch 里写一个表达式，计算图里的**每个基本操作都会被实现成一个 kernel**。每启动一个 kernel，都要从 HBM 读数据、搬到 SM、算完、写回；下一个 kernel 再从 HBM 取走结果……数据在 HBM 与 SM 之间**来回往返**。这就是**没有算子融合（no fusion）**的代价；
+- **naive_gelu**：profiler 里出现**一堆不同的 kernel**——`binary`（二元运算）、`unary`（一元运算）、`add`、`tanh`……每一个都是一次独立的 kernel 启动。原因在于：PyTorch 里写一个表达式，计算图里的**每个基本操作都会被实现成一个 kernel**。每启动一个 kernel，都要从 HBM 读数据、搬到 SM、算完、写回；下一个 kernel 再从 HBM 取走结果……数据在 HBM 与 SM 之间**来回往返**。这就是**没有算子融合**（no fusion）的代价；
 - **builtin_gelu**：profiler 里只有一个 **GeLU 的 CUDA kernel**。为什么？因为大家都用 GeLU，所以有人为它专门写了一个 kernel 放进了标准库——没什么神奇的，就是“被优化的热门操作”；
 - **compiled_gelu**：最有趣——profiler 显示它**只有一个 kernel**，而且**是一个 Triton kernel**。`torch.compile` 做的事，本质上是**看懂你的计算图，然后把它编译成（Triton）kernel**。
 

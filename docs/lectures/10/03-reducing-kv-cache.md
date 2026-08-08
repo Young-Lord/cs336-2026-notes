@@ -60,7 +60,7 @@ stats_gqa_big = compute_transformer_performance_stats(config_gqa_big)
 
 说到 DeepSeek，这里介绍另一个减小 KV cache 的想法。思路主线依然是：减小 KV cache → 提升延迟与吞吐。
 
-回顾 MHA 与 GQA：MHA 对每个 token 有相同数量的 query、key、value；GQA 减少的是 key 与 value 的**数量**（头数）。**多头潜变量注意力（multi-head latent attention，MLA）**则完全保持 key、value 的数量不变（每个 token 各一份），转而把 KV cache 做**参数化压缩**。
+回顾 MHA 与 GQA：MHA 对每个 token 有相同数量的 query、key、value；GQA 减少的是 key 与 value 的**数量**（头数）。**多头潜变量注意力**（multi-head latent attention，MLA）则完全保持 key、value 的数量不变（每个 token 各一份），转而把 KV cache 做**参数化压缩**。
 
 正常情况下怎么算 key 和 value？把激活 $h$ 分别乘以一个矩阵：
 
@@ -111,7 +111,7 @@ $$K = W_K c, \qquad V = W_V c$$
 
 ## 局部（滑动窗口）注意力
 
-接着是快速浏览一组减小 KV cache 的技巧。**局部注意力（local attention）/ 滑动窗口注意力（sliding window attention）**是很老、也很自然的想法：完整注意力的矩阵是 $S^2$ 大小；生成新 token 时，其实**只看最近的 $K$ 个 token** 就够了——对每个要生成的 token，只依赖它前面 $K$ 个 token。
+接着是快速浏览一组减小 KV cache 的技巧。**局部注意力（local attention）/ 滑动窗口注意力**（sliding window attention）是很老、也很自然的想法：完整注意力的矩阵是 $S^2$ 大小；生成新 token 时，其实**只看最近的 $K$ 个 token** 就够了——对每个要生成的 token，只依赖它前面 $K$ 个 token。
 
 ![滑动窗口注意力：每个 token 只看最近的几个 token](/lectures/10/longformer-attention.png)
 
@@ -120,7 +120,7 @@ $$K = W_K c, \qquad V = W_V c$$
 - **KV cache 与序列长度无关**！它只取决于 $B \times$（每序列固定的窗口大小 $K \times$ 头数等），对长上下文尤其友好；
 - 而且由于有多层堆叠，信息的**有效上下文长度**可以比单层窗口更大——信息在层与层之间向下游传播，有效感受野随层数线性增长。
 
-还可以做更花哨的变体：不是稠密地选择每一层，而是隔几层取一个；或者**全局（global）+ 局部（local）**混合——对一组固定的 token 点做全局注意力，再加上局部滑动窗口。
+还可以做更花哨的变体：不是稠密地选择每一层，而是隔几层取一个；或者**全局（global）+ 局部**（local）混合——对一组固定的 token 点做全局注意力，再加上局部滑动窗口。
 
 但问题是：**它仍然伤精度**，降低了表达力（expressivity）——没有免费的午餐，或者说这顿午餐很贵。人们的解决方案是：把局部注意力与全局注意力**交错（interleave）**——这些混合（hybrid）模型让一部分层用完整注意力、另一部分层用局部注意力，从而适度减小 KV cache，同时尽量平衡精度。
 

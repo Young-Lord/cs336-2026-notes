@@ -82,7 +82,7 @@ EP 听起来很美好，但实现起来非常非常难——自 FSDP 之后讲�
 
 ## 上下文并行 / Ring Attention
 
-这一块想讲的最后一件事是**上下文并行（context parallel，CP）**，也叫 **ring attention**。它把一条**很长的序列的激活切分**到不同加速器上，然后按 TPU 的 mesh 拓扑那样、以**环（ring）**的方式把数据传到需要的设备上。原始的 ring attention 论文就证明了它在 TPU 上效果极好；context parallel 是标准的并行策略，两者都用在**长上下文扩展（long-context extension）阶段**和**模型服务（serving）**中。这一讲不展开，因为它的概念和我们已经讲过的很多东西高度重合。
+这一块想讲的最后一件事是**上下文并行（context parallel，CP）**，也叫 **ring attention**。它把一条**很长的序列的激活切分**到不同加速器上，然后按 TPU 的 mesh 拓扑那样、以**环**（ring）的方式把数据传到需要的设备上。原始的 ring attention 论文就证明了它在 TPU 上效果极好；context parallel 是标准的并行策略，两者都用在**长上下文扩展（long-context extension）阶段**和**模型服务**（serving）中。这一讲不展开，因为它的概念和我们已经讲过的很多东西高度重合。
 
 ## 总表：并行策略一览
 

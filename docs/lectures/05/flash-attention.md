@@ -46,7 +46,7 @@ $$\mathrm{softmax}(x)_i = \frac{e^{x_i - m}}{\sum_j e^{x_j - m}}, \qquad m = \ma
 
 $$m^{(t+1)} = \max(S^{(t+1)}), \qquad l^{(t+1)} = \sum_{i} e^{S^{(t+1)}_i - m^{(t+1)}}$$
 
-然后做**望远镜求和(telescoping sum)**式的纠正更新:
+然后做**望远镜求和**(telescoping sum)式的纠正更新:
 
 $$m_{t+1} = \max(m_t,\ m^{(t+1)})$$
 

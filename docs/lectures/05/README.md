@@ -9,7 +9,7 @@ lecture: 5
 
 ## 本讲内容
 
-这一讲是课程**系统部分（systems）**的开篇，目标是把 GPU 这层"魔法"拆开。前半讲是 GPU 的硬件模型与编程模型：从 **Dennard scaling 的枯竭**与**并行扩展**讲起，对比 **CPU（延迟）与 GPU（吞吐)**的哲学差异，然后深入解剖 GPU——**SM/SP 计算单元、内存层级（寄存器、L1/shared、L2、HBM）、执行模型（线程/块/warp）、内存模型**，再以 **TPU** 作为"GPU 的另一个进化分支"做对照（趋同演化、MXU 与 tensor core、脉动阵列），最后讲**矩阵乘法硬件史**（从 shader 黑客到 Tensor Core）与**算力 vs 内存扩展（内存墙）**。第二部分讲**六个加速技巧**:roofline 模型、控制发散、低精度计算（FP16/BF16、FP8、MXFP8、MXFP4）、算子融合、重计算、合并访存、tiling，并用它们**解密矩阵乘法的"神秘性能曲线"**（整除性/对齐、波次量化 wave quantization）。第三部分把一切串起来，推导**在线 softmax 的望远镜求和**并完整拆解 **FlashAttention 的前向与反向**。
+这一讲是课程**系统部分**（systems）的开篇，目标是把 GPU 这层"魔法"拆开。前半讲是 GPU 的硬件模型与编程模型：从 **Dennard scaling 的枯竭**与**并行扩展**讲起，对比 **CPU（延迟）与 GPU**（吞吐）的哲学差异，然后深入解剖 GPU——**SM/SP 计算单元、内存层级（寄存器、L1/shared、L2、HBM）、执行模型（线程/块/warp）、内存模型**，再以 **TPU** 作为"GPU 的另一个进化分支"做对照（趋同演化、MXU 与 tensor core、脉动阵列），最后讲**矩阵乘法硬件史**（从 shader 黑客到 Tensor Core）与**算力 vs 内存扩展（内存墙）**。第二部分讲**六个加速技巧**:roofline 模型、控制发散、低精度计算（FP16/BF16、FP8、MXFP8、MXFP4）、算子融合、重计算、合并访存、tiling，并用它们**解密矩阵乘法的"神秘性能曲线"**（整除性/对齐、波次量化 wave quantization）。第三部分把一切串起来，推导**在线 softmax 的望远镜求和**并完整拆解 **FlashAttention 的前向与反向**。
 
 | 页面 | 内容 |
 |------|------|

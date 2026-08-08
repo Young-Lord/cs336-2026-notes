@@ -40,7 +40,7 @@ lecture: 7
 
 有两个值得提的进展：
 
-- **NVL72**：NVIDIA 一直在把 pod 做得更大。对 B200/B300 这一代，他们推出了 **GB200/GB300 NVL72**——每个**托盘（tray）**上 8 块 GPU，9 个托盘叠成一个**机架（rack）**，于是**72 块 GPU 全都在一个 NVLink 域里**、全部经 NVSwitch 互联。还记得吗，NVLink 非常快。普通人只能享受"8 块 GPU 高速互联，再往外就慢下来"；有钱的话，可以买到把超快互联延伸到 72 块 GPU 的硬件；
+- **NVL72**：NVIDIA 一直在把 pod 做得更大。对 B200/B300 这一代，他们推出了 **GB200/GB300 NVL72**——每个**托盘**（tray）上 8 块 GPU，9 个托盘叠成一个**机架（rack）**，于是**72 块 GPU 全都在一个 NVLink 域里**、全部经 NVSwitch 互联。还记得吗，NVLink 非常快。普通人只能享受"8 块 GPU 高速互联，再往外就慢下来"；有钱的话，可以买到把超快互联延伸到 72 块 GPU 的硬件；
 - **RoCE（RDMA over Converged Ethernet）**：前面说标准 Ethernet 不支持 RDMA，但以太网这边也有进展。**RoCE** 让 Ethernet **绕过 CPU**，相当于对 InfiniBand 的一个回应。InfiniBand（以及许多 NVIDIA 产品）非常贵，而 RoCE 能用便宜不少的东西换到不错的性能；**Meta** 有论文在探索这条路线——所以 **Llama 可能（也可能没有）是在 converged Ethernet 上训练的**。
 
 于是硬件全貌就是：GPU 经 NVLink 连到 NVSwitch（一个域里 8 块，或者 72 块），再往外走 InfiniBand，再往外走 Ethernet。

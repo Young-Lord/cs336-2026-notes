@@ -9,7 +9,7 @@ lecture: 6
 
 ## 本讲内容
 
-这一讲是系统部分的第二讲，紧接 Tatsu 在上一讲给出的 GPU 高层概览。本讲的目标是把视角从“想”转向“做”：**深入代码**，亲手用 **Triton** 写 kernel，并用**基准测试（benchmarking）与性能剖析（profiling）**来验证性能。前半讲快速回顾 GPU 的硬件与编程模型（内存层级、线程/线程块/网格），随后深入**编程模型与硬件交互**的五个性能考量——**warp 与控制发散、warp 占用率、bank 冲突、内存合并（coalescing）、块占用率（波次量化）**。第二部分讲方法论：**基准测试**（如何正确地计时）与**性能剖析**（时间到底花在哪里），并用 **GeLU** 作为案例（naive vs builtin vs `torch.compile`）说明**算子融合（kernel fusion）**的价值。第三部分是重头戏：依次手写四个难度递增的 **Triton kernel**——逐元素的 **GeLU**（顺带读懂它编译出的 **PTX** 汇编）、按行的 **softmax**（归约）、行放不进块的 **row sum**（“婴儿版 tiling”）、以及终极示例**矩阵乘法（matmul）**（真正的 tiling + 用 shared memory 复用数据 + kernel 融合）。
+这一讲是系统部分的第二讲，紧接 Tatsu 在上一讲给出的 GPU 高层概览。本讲的目标是把视角从“想”转向“做”：**深入代码**，亲手用 **Triton** 写 kernel，并用**基准测试（benchmarking）与性能剖析**（profiling）来验证性能。前半讲快速回顾 GPU 的硬件与编程模型（内存层级、线程/线程块/网格），随后深入**编程模型与硬件交互**的五个性能考量——**warp 与控制发散、warp 占用率、bank 冲突、内存合并（coalescing）、块占用率（波次量化）**。第二部分讲方法论：**基准测试**（如何正确地计时）与**性能剖析**（时间到底花在哪里），并用 **GeLU** 作为案例（naive vs builtin vs `torch.compile`）说明**算子融合**（kernel fusion）的价值。第三部分是重头戏：依次手写四个难度递增的 **Triton kernel**——逐元素的 **GeLU**（顺带读懂它编译出的 **PTX** 汇编）、按行的 **softmax**（归约）、行放不进块的 **row sum**（“婴儿版 tiling”）、以及终极示例**矩阵乘法（matmul）**（真正的 tiling + 用 shared memory 复用数据 + kernel 融合）。
 
 | 页面 | 内容 |
 |------|------|

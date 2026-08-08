@@ -15,7 +15,7 @@ lecture: 12
 
 ## SWE-bench：提交一个能通过测试的 PR
 
-**SWE-bench** 是最流行的智能体基准之一。任务是：给你一个**代码库（codebase）**和一份 **GitHub issue 的描述**，你要**提交一个 pull request（PR）**去修复它。而评估 PR 的方式非常简单直接：**看它能不能通过单元测试（unit tests）**。
+**SWE-bench** 是最流行的智能体基准之一。任务是：给你一个**代码库**（codebase）和一份 **GitHub issue 的描述**，你要**提交一个 pull request**（PR）去修复它。而评估 PR 的方式非常简单直接：**看它能不能通过单元测试（unit tests）**。
 
 这些测试是精心设计的：提交 PR 之前，某些单元测试不通过（这正是 issue 要修的 bug）；你的目标是修复它——让这些测试通过，同时**不破坏其他任何东西**（原有测试仍然通过）。
 

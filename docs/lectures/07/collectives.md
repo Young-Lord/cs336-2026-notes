@@ -22,7 +22,7 @@ lecture: 7
 - **rank**：一个特定的设备——对我们来说是 GPU（也可以是 TPU）。图里有四个 rank，编号 0、1、2、3；
 - **世界大小（world size）**：设备的总数。这里的 world size 就是 **4**。
 
-接下来我们要过一遍几种操作。broadcast、scatter、gather、reduce 在我看来只是**热身**——它们能帮你建立对 collective 的直觉，但并不是训练的主力；**all-gather、reduce-scatter、all-reduce** 才是大模型分布式训练里反复出现的工作马（workhorse）；最后提一下 **all-to-all**，它对 **MoE（混合专家）**很重要，但本讲不打算花太多时间。
+接下来我们要过一遍几种操作。broadcast、scatter、gather、reduce 在我看来只是**热身**——它们能帮你建立对 collective 的直觉，但并不是训练的主力；**all-gather、reduce-scatter、all-reduce** 才是大模型分布式训练里反复出现的工作马（workhorse）；最后提一下 **all-to-all**，它对 **MoE**（混合专家）很重要，但本讲不打算花太多时间。
 
 ## Broadcast：从 rank 0 复制给所有 rank
 
@@ -43,7 +43,7 @@ broadcast 一般不出现于训练的主路径上，它主要用于**初始化**
 
 ## Scatter：把一个张量散开
 
-**scatter（散开）**说的是：rank 0 持有一个张量，把它按 world size **切成几块**，然后分发到各个 rank 上。于是 rank 0 拿到第 0 个分量，rank 1 拿到第 1 个分量，rank 2、rank 3 依次拿到各自的分量：
+**scatter**（散开）说的是：rank 0 持有一个张量，把它按 world size **切成几块**，然后分发到各个 rank 上。于是 rank 0 拿到第 0 个分量，rank 1 拿到第 1 个分量，rank 2、rank 3 依次拿到各自的分量：
 
 ```python
 # 输入：rank 0 持有完整张量
@@ -60,7 +60,7 @@ scatter 本身也不直接用于训练，但它是理解 **reduce-scatter** 的�
 
 ## Gather：scatter 的逆操作
 
-**gather（汇聚）**是 scatter 的逆，应该很好理解。输入是一堆分片，每个分片住在各自的 rank 上；对某个目标 rank（比如 rank 0）做 gather，就是把这些分片**拼接**起来：
+**gather**（汇聚）是 scatter 的逆，应该很好理解。输入是一堆分片，每个分片住在各自的 rank 上；对某个目标 rank（比如 rank 0）做 gather，就是把这些分片**拼接**起来：
 
 ```python
 # 输入：每个 rank 持有自己的分片
@@ -77,7 +77,7 @@ rank0 = tensor([0., 1, 2, 3])
 
 ## Reduce：把各处的数据归约到 rank 0
 
-做过函数式编程的同学应该对 **reduce（归约）**很熟，这里的语义完全一样。它的输入起点和 gather 一样——每个 rank 上有一份数据；然后你把某种**归约运算**应用在所有数据上，把结果放到 rank 0。比如用求和（sum）归约 $[0, 1, 2, 3]$ 这四个数，就得到 $6$：
+做过函数式编程的同学应该对 **reduce**（归约）很熟，这里的语义完全一样。它的输入起点和 gather 一样——每个 rank 上有一份数据；然后你把某种**归约运算**应用在所有数据上，把结果放到 rank 0。比如用求和（sum）归约 $[0, 1, 2, 3]$ 这四个数，就得到 $6$：
 
 ```python
 # 输入：每个 rank 持有自己的分量
@@ -183,8 +183,8 @@ rank3 = tensor([3, 7, 11, 15])
 关于 all-to-all 有几点值得一提：
 
 - **它服务于 MoE**：在 MoE 里，每个 rank 持有一部分数据、一部分专家；根据路由结果，数据要被送到持有对应专家的 rank 上去算——这种"把数据路由给专家"的操作正是 all-to-all；
-- 如果分割是**均衡（balanced）**的，把每行看作矩阵的一行，那么 all-to-all 做的事本质上就是**矩阵转置（transpose）**——把输入矩阵转置一下，每个 rank 拿到的恰好是转置后的某一列；
-- 它也支持**不均衡（unbalanced）**的分割——你可以配置给任意 rank 发任意数量的字节；不过一般希望分割**尽量均衡**。还记得讲 MoE 那讲里我们做**负载均衡（load balancing）**、让事情尽量平衡吗？道德上，理想的 all-to-all 就应该长上面这个样子。
+- 如果分割是**均衡**（balanced）的，把每行看作矩阵的一行，那么 all-to-all 做的事本质上就是**矩阵转置（transpose）**——把输入矩阵转置一下，每个 rank 拿到的恰好是转置后的某一列；
+- 它也支持**不均衡**（unbalanced）的分割——你可以配置给任意 rank 发任意数量的字节；不过一般希望分割**尽量均衡**。还记得讲 MoE 那讲里我们做**负载均衡（load balancing）**、让事情尽量平衡吗？道德上，理想的 all-to-all 就应该长上面这个样子。
 
 ## 术语记忆法
 

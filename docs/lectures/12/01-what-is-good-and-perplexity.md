@@ -79,11 +79,11 @@ def perplexity(token_log_probs: list[float]) -> float:
 - **WikiText-103**（维基百科）；
 - **One Billion Word Benchmark**（十亿词基准，源自机器翻译语料 WMT11——EuroParl、联合国、新闻）。
 
-这些都是经典的**同分布评估（in-distribution evaluation）**范式：你在某个数据集的训练划分上训练，在它的测试划分上评估。那时"进步"就是用困惑度下降来衡量的。例如 2016 年有一篇著名的论文，把纯 CNN 和 LSTM 应用到 One Billion Word Benchmark 上，取得了巨大的困惑度下降（从 51.3 降到 30.0）。要知道当时人们还在讨论 n-gram 模型和混合模型，这是第一个决定性的结果表明：**纯神经网络明显是正道**。那时生活非常简单——在训练集上训练，在测试集上测困惑度。
+这些都是经典的**同分布评估**（in-distribution evaluation）范式：你在某个数据集的训练划分上训练，在它的测试划分上评估。那时"进步"就是用困惑度下降来衡量的。例如 2016 年有一篇著名的论文，把纯 CNN 和 LSTM 应用到 One Billion Word Benchmark 上，取得了巨大的困惑度下降（从 51.3 降到 30.0）。要知道当时人们还在讨论 n-gram 模型和混合模型，这是第一个决定性的结果表明：**纯神经网络明显是正道**。那时生活非常简单——在训练集上训练，在测试集上测困惑度。
 
 ## 从同分布到跨分布：GPT-2 与新范式
 
-2019 年 OpenAI 的 GPT-2 改变了这一切。GPT-2 在名为 **WebText** 的数据集上训练——40GB 来自 Reddit 上被链接过的网页文本。而它的评估方式完全不同：它在大家通用的标准数据集上做**零样本（zero-shot）**评估，也就是**跨分布评估（out-of-distribution evaluation）**。
+2019 年 OpenAI 的 GPT-2 改变了这一切。GPT-2 在名为 **WebText** 的数据集上训练——40GB 来自 Reddit 上被链接过的网页文本。而它的评估方式完全不同：它在大家通用的标准数据集上做**零样本**（zero-shot）评估，也就是**跨分布评估（out-of-distribution evaluation）**。
 
 ![GPT-2 论文中的零样本困惑度结果](/lectures/12/gpt2-perplexity.png)
 

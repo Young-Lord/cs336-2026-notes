@@ -23,7 +23,7 @@ Tatsu 开场先交代了一个小小的"计划变更"：这一讲原本打算继
 
 那么，这样的东西要怎么建？Tatsu 用一个他自己都承认有点"奇怪的动机"（weird way to motivate）开场：**事实是，Transformer 在所有模态上都表现得出奇地好**。尽管人们尽了最大努力去尝试别的架构，但在规模化（at scale）的前提下，Transformer 仍然是我们在所有模态上拥有的最好的东西。所以我们别无选择，只能想办法去**用**它。
 
-但 Transformer 是为文本设计的。它们有一个很根本的性质：**它们"说"token**——输入是一堆 token，输出也是一堆 token。这里 Tatsu 把"token"的概念**拓展**了一下：token 不一定是文本里那种**离散（discrete）**的子词，也可以是**连续（continuous）**的向量——你可以把它们理解为"token 的嵌入（embedding）"。
+但 Transformer 是为文本设计的。它们有一个很根本的性质：**它们"说"token**——输入是一堆 token，输出也是一堆 token。这里 Tatsu 把"token"的概念**拓展**了一下：token 不一定是文本里那种**离散**（discrete）的子词，也可以是**连续**（continuous）的向量——你可以把它们理解为"token 的嵌入（embedding）"。
 
 关键在于：**一个 token 应该代表某种"语义单元"（semantic unit of information）**。例如在自然语言里，token 是子词（subword），多少带一点语义；而反过来，**一个像素（pixel）单独来看肯定不构成任何语义**。所以我们总得想办法把一切模态——包括音频、图像——都转换成离散或连续的 token。
 

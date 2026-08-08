@@ -15,7 +15,7 @@ lecture: 17
 
 | 页面 | 内容 |
 |------|------|
-| [17 · 引言：从语言模型到全模态模型](01-introduction-and-omni-models.md) | 讲次动机（多模态无处不在）、**语言模型 text→text**、多模态世界与**全模态模型（omni model）**北极星、Transformer 只会说 token（离散或连续）、token 应代表语义单元、文本有 BPE 而图像没有等价物、**两个核心问题（如何输入非文本、如何生成非文本）**、本讲聚焦输入 |
+| [17 · 引言：从语言模型到全模态模型](01-introduction-and-omni-models.md) | 讲次动机（多模态无处不在）、**语言模型 text→text**、多模态世界与**全模态模型**（omni model）北极星、Transformer 只会说 token（离散或连续）、token 应代表语义单元、文本有 BPE 而图像没有等价物、**两个核心问题（如何输入非文本、如何生成非文本）**、本讲聚焦输入 |
 | [17 · CLIP：对比语言-图像预训练](02-clip.md) | 历史背景（ImageNet/ResNet 时代 vs GPT-3 的语言"基础模型时代"）、动机（利用网上海量图文对）、**CLIP 方法与 InfoNCE 目标的完整形式化**、训练代码（归一化 → 温度缩放点积 → 双向交叉熵）、数据（500K 查询 / 4 亿图文对、OpenCLIP 与 LAION-5B 的自举）、数据处理（resize + 中心裁剪）、**ViT 视觉编码器（分块、位置嵌入、attention pooling 公式）**、ViT-L/14@336px、文本编码器（GPT-2、[BOS]…[EOS]）、**零样本 ImageNet 超越 ResNet-50**、课堂问答（弱监督噪声、位置嵌入）、消融（预测文本 vs 排序目标） |
 | [17 · SigLIP：用二分类损失训练图像编码器](03-siglip.md) | CLIP 的两个技术缺点（需要超大 batch、softmax 覆盖全 batch 不可分解）、**SigLIP 逐对二分类目标（公式 + 代码）**、课堂问答（负样本采样）、数据（WebLI：OCR、过滤、100 语言）、**效率对比（CLIP 10 天 256×TPUv3 vs SigLIP 5 天 32×TPUv4）**、并行化（文本嵌入轮转交换、覆盖非对角块）、**batch size 与损失解耦**（<16K 更优、100 万无益、临界值约 32K） |
 | [17 · LLaVA 与 LLaVA OneVision：把图像注入语言模型](04-llava.md) | VLM 模板（视觉编码器 + 投影器 + 语言模型）、LLaVA 2023（CLIP + Vicuna + **线性投影 $W$**）、**GPT-4 合成数据（MS COCO + 158K 例子）**、**两阶段训练（对齐 $W$ → 微调语言模型）**、"熨斗熨在面包车后座"的例子、LLaVA OneVision 2024（SigLIP + Qwen2 + 两层 MLP）、**AnyRes 高分辨率方案（为 OCR）**、单图/多图/视频的 token 预算分配、质量优先数据、由易到难三阶段训练、跨模态迁移（图表→多图、OCR/关系推理→GUI 智能体、视觉提示→视频）、开源模型与数据 |

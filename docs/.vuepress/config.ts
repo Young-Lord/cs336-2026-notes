@@ -5,7 +5,8 @@ import { markdownMathPlugin } from "@vuepress/plugin-markdown-math";
 
 /** 每讲的元信息;`pages` 列出本讲拆分的子页面(按阅读顺序)。 */
 const lectures = [
-  { text: "2025 → 2026 第 1/2 讲差异", prefix: "/lectures/01-02-diff/", pages: ["lecture-01-diff.md", "lecture-02-diff.md"] },
+  { text: "01 Overview and Tokenization", prefix: "/lectures/01/", pages: ["01-why-this-course.md", "02-history-of-lms.md", "03-course-logistics.md", "04-syllabus.md", "05-tokenization-basics.md", "06-bpe.md"] },
+  { text: "02 Resource Accounting", prefix: "/lectures/02/", pages: ["01-motivation-and-tensors.md", "02-precision-formats.md", "03-flops-and-mfu.md", "04-arithmetic-intensity.md", "05-memory-and-compute.md", "06-memory-optimizations.md"] },
   { text: "03 Architectures", prefix: "/lectures/03/", pages: ["overview.md", "normalization.md", "activations-ffn.md", "position-embeddings.md", "hyperparameters.md", "stability-and-attention.md"] },
   { text: "04 Attention Alternatives", prefix: "/lectures/04/", pages: ["overview.md", "linear-attention.md", "ssm-hybrid.md", "sparse-attention.md", "moe.md", "moe-training.md"] },
   { text: "05 GPUs, TPUs", prefix: "/lectures/05/", pages: ["overview.md", "gpu-hardware.md", "tpu-and-strengths.md", "gpu-performance.md", "matrix-mystery.md", "flash-attention.md"] },
@@ -40,7 +41,7 @@ export default defineUserConfig({
   theme: defaultTheme({
     navbar: [
       { text: "Home", link: "/" },
-      { text: "Lectures", link: "/lectures/03/" },
+      { text: "Lectures", link: "/lectures/01/" },
     ],
     sidebar,
   }),

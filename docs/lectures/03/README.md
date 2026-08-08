@@ -36,5 +36,5 @@ lecture: 3
 
 ## 课程导航
 
-- [上一讲：2025 → 2026 第 1/2 讲差异（Overview & Tokenization / PyTorch）](../01-02-diff/)
+- [上一讲：02 Resource Accounting](../02/)
 - [下一讲：04 Attention Alternatives](../04/)

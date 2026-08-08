@@ -5,7 +5,7 @@ heroText: CS336 2026 课程笔记
 tagline: "Stanford CS336: Language Modeling from Scratch (Spring 2026) 中文详尽课程笔记"
 actions:
   - text: 开始阅读
-    link: /lectures/03/
+    link: /lectures/01/
     type: primary
 ---
 
@@ -18,15 +18,14 @@ actions:
 - **整理方式**: 在保留全部授课内容(含发散与口语表述)的基础上校对为完整、可流畅阅读的讲课内容;补全语音中未体现的公式与推导;公式使用 LaTeX 编写
 - **组织结构**: 每讲划分为若干小节,包含详尽的讲解、适当的代码与图片
 
-> 说明:本网站从**第 3 讲**开始,第 3~18 讲笔记**全部完成**。第 1、2 讲与 2025 版差异不大,已整理为
-> [「2025 → 2026 第 1/2 讲差异」](./lectures/01-02-diff/README.md) 供已学过 2025 版的同学快速掌握增量内容。
+> 说明:第 1~18 讲笔记**全部完成**,从第 1 讲即可按顺序阅读。
 
 ## 课程目录
 
 | # | 主题 | 讲师 |
 |---|------|------|
-| 01 | Overview, Tokenization | Percy Liang |
-| 02 | PyTorch (einops) | Percy Liang |
+| [01](./lectures/01/) | Overview, Tokenization | Percy Liang |
+| [02](./lectures/02/) | PyTorch (einops) | Percy Liang |
 | [03](./lectures/03/) | Architectures | Tatsunori Hashimoto |
 | [04](./lectures/04/) | Attention Alternatives | Tatsunori Hashimoto |
 | [05](./lectures/05/) | GPUs, TPUs | Tatsunori Hashimoto |

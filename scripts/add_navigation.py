@@ -15,6 +15,8 @@ MARKER = "<!-- lecture-nav -->"
 
 # (lecture dir, display title)
 LECTURES_2026 = [
+    ("01", "01 Overview and Tokenization"),
+    ("02", "02 Resource Accounting"),
     ("03", "03 Architectures"),
     ("04", "04 Attention Alternatives"),
     ("05", "05 GPUs, TPUs"),
@@ -35,6 +37,8 @@ LECTURES_2026 = [
 
 # pages per lecture, in reading order (must mirror docs/.vuepress/config.ts)
 PAGES_2026 = {
+    "01": ["01-why-this-course.md", "02-history-of-lms.md", "03-course-logistics.md", "04-syllabus.md", "05-tokenization-basics.md", "06-bpe.md"],
+    "02": ["01-motivation-and-tensors.md", "02-precision-formats.md", "03-flops-and-mfu.md", "04-arithmetic-intensity.md", "05-memory-and-compute.md", "06-memory-optimizations.md"],
     "03": ["overview.md", "normalization.md", "activations-ffn.md", "position-embeddings.md", "hyperparameters.md", "stability-and-attention.md"],
     "04": ["overview.md", "linear-attention.md", "ssm-hybrid.md", "sparse-attention.md", "moe.md", "moe-training.md"],
     "05": ["overview.md", "gpu-hardware.md", "tpu-and-strengths.md", "gpu-performance.md", "matrix-mystery.md", "flash-attention.md"],

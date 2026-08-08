@@ -31,6 +31,7 @@ const sidebar = lectures.map(({ text, prefix, pages }) => ({
 }));
 
 export default defineUserConfig({
+  base: "/cs336-2026-notes/",
   lang: "zh-CN",
   title: "CS336 2026 课程笔记",
   description:

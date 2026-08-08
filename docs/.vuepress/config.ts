@@ -19,7 +19,7 @@ const lectures = [
   { text: "13 Data (Sources, Datasets)", prefix: "/lectures/13/", pages: ["01-why-data-matters.md", "02-origin-of-data.md", "03-copyright-and-fair-use.md", "04-source-infrastructure.md", "05-model-datasets-2019-2022.md", "06-model-datasets-2023-2024.md"] },
   { text: "14 Data", prefix: "/lectures/14/", pages: ["01-data-transformation.md", "02-filtering-framework.md", "03-filtering-in-practice.md", "04-deduplication.md", "05-data-mixing.md", "06-post-training-synthetic-data.md"] },
   { text: "15 Mid/Post-Training", prefix: "/lectures/15/", pages: ["01-introduction-and-sft-data.md", "02-sft-data-style-and-pitfalls.md", "03-midtraining-and-sft-method.md", "04-rlhf-data-and-annotation.md", "05-ppo.md", "06-dpo-and-side-effects.md"] },
-  { text: "16 Post-Training - RLVR", prefix: "/lectures/16/", pages: [] },
+  { text: "16 Post-Training - RLVR", prefix: "/lectures/16/", pages: ["01-introduction-rlvr.md", "02-ppo-revisited.md", "03-grpo.md", "04-deepseek-r1.md", "05-kimi-k15.md", "06-qwen3-and-agentic-rl.md"] },
   { text: "17 Alignment - Multimodality", prefix: "/lectures/17/", pages: [] },
   { text: "18 Guest Lecture: Dan Fu", prefix: "/lectures/18/", pages: [] },
 ];

@@ -49,6 +49,7 @@ PAGES_2026 = {
     "14": ["01-data-transformation.md", "02-filtering-framework.md", "03-filtering-in-practice.md", "04-deduplication.md", "05-data-mixing.md", "06-post-training-synthetic-data.md"],
     "15": ["01-introduction-and-sft-data.md", "02-sft-data-style-and-pitfalls.md", "03-midtraining-and-sft-method.md", "04-rlhf-data-and-annotation.md", "05-ppo.md", "06-dpo-and-side-effects.md"],
     "16": ["01-introduction-rlvr.md", "02-ppo-revisited.md", "03-grpo.md", "04-deepseek-r1.md", "05-kimi-k15.md", "06-qwen3-and-agentic-rl.md"],
+    "17": ["01-introduction-and-omni-models.md", "02-clip.md", "03-siglip.md", "04-llava.md", "05-qwen-vl.md", "06-chameleon-and-summary.md"],
 }
 
 LECTURES_2025 = [

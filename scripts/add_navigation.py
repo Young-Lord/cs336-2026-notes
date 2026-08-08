@@ -46,6 +46,7 @@ PAGES_2026 = {
     "11": ["01-introduction-and-motivation.md", "02-minicpm-scaling-recipe.md", "03-wsd-and-deepseek.md", "04-recent-scaling-recipes.md", "05-stepfun-and-optimizer-scaling.md", "06-muon-and-mup.md"],
     "12": ["01-what-is-good-and-perplexity.md", "02-exam-benchmarks.md", "03-chat-benchmarks.md", "04-agentic-benchmarks.md", "05-reasoning-and-safety-benchmarks.md", "06-realism-validity-and-conclusion.md"],
     "13": ["01-why-data-matters.md", "02-origin-of-data.md", "03-copyright-and-fair-use.md", "04-source-infrastructure.md", "05-model-datasets-2019-2022.md", "06-model-datasets-2023-2024.md"],
+    "14": ["01-data-transformation.md", "02-filtering-framework.md", "03-filtering-in-practice.md", "04-deduplication.md", "05-data-mixing.md", "06-post-training-synthetic-data.md"],
 }
 
 LECTURES_2025 = [

@@ -21,7 +21,7 @@ const lectures = [
   { text: "15 Mid/Post-Training", prefix: "/lectures/15/", pages: ["01-introduction-and-sft-data.md", "02-sft-data-style-and-pitfalls.md", "03-midtraining-and-sft-method.md", "04-rlhf-data-and-annotation.md", "05-ppo.md", "06-dpo-and-side-effects.md"] },
   { text: "16 Post-Training - RLVR", prefix: "/lectures/16/", pages: ["01-introduction-rlvr.md", "02-ppo-revisited.md", "03-grpo.md", "04-deepseek-r1.md", "05-kimi-k15.md", "06-qwen3-and-agentic-rl.md"] },
   { text: "17 Alignment - Multimodality", prefix: "/lectures/17/", pages: ["01-introduction-and-omni-models.md", "02-clip.md", "03-siglip.md", "04-llava.md", "05-qwen-vl.md", "06-chameleon-and-summary.md"] },
-  { text: "18 Guest Lecture: Dan Fu", prefix: "/lectures/18/", pages: [] },
+  { text: "18 Guest Lecture: Dan Fu", prefix: "/lectures/18/", pages: ["01-introduction-and-motivation.md", "02-lifetime-of-a-token.md", "03-prefill-decode-and-batching.md", "04-kv-cache-and-parallelism.md", "05-serving-at-scale.md", "06-megakernels-and-parcae.md"] },
 ];
 
 const sidebar = lectures.map(({ text, prefix, pages }) => ({

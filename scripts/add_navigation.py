@@ -47,6 +47,7 @@ PAGES_2026 = {
     "12": ["01-what-is-good-and-perplexity.md", "02-exam-benchmarks.md", "03-chat-benchmarks.md", "04-agentic-benchmarks.md", "05-reasoning-and-safety-benchmarks.md", "06-realism-validity-and-conclusion.md"],
     "13": ["01-why-data-matters.md", "02-origin-of-data.md", "03-copyright-and-fair-use.md", "04-source-infrastructure.md", "05-model-datasets-2019-2022.md", "06-model-datasets-2023-2024.md"],
     "14": ["01-data-transformation.md", "02-filtering-framework.md", "03-filtering-in-practice.md", "04-deduplication.md", "05-data-mixing.md", "06-post-training-synthetic-data.md"],
+    "15": ["01-introduction-and-sft-data.md", "02-sft-data-style-and-pitfalls.md", "03-midtraining-and-sft-method.md", "04-rlhf-data-and-annotation.md", "05-ppo.md", "06-dpo-and-side-effects.md"],
 }
 
 LECTURES_2025 = [
